@@ -1,30 +1,21 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './translations/i18n';
 import { useTranslation } from 'react-i18next';
-import { Text } from '@chakra-ui/react';
-import logo from './logo.svg';
 import './App.css';
+
+import Default from './temp/defaultTemplate';
+import Test from './temp/testTemplate';
 
 function App() {
   const { t } = useTranslation();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Text>{t('welcome')}</Text>
-          <Text>Learn React</Text>
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path={t('rdefault')} element={<Default />} />
+        <Route path={t('rtest')} element={<Test />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

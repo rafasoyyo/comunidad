@@ -10,6 +10,7 @@ const Routes = {
     "rnotifications": "/notificaciones",
     "rprofile": "/perfil",
     "rreceipts": "/recibos",
+    "rtest": "/test",
     "rusers": "/vecinos"
 };
 
