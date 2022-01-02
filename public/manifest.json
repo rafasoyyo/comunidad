@@ -1,0 +1,25 @@
+{
+  "short_name": "Mi Comunidad",
+  "name": "Software para la gestión de la comunidades de vecinos",
+  "icons": [
+    {
+      "src": "apartamentos_bgwhite.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "apartamentos_bgwhite.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "apartamentos_bgwhite.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}
