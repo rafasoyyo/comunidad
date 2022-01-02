@@ -44,13 +44,8 @@ i18n
     // init i18next
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
-        lng: 'es',
+        lng: navigator.language,
         // debug: true,
         fallbackLng: 'es',
-        interpolation: {
-            escapeValue: false, // not needed for react as it escapes by default
-        },
         resources
     });
-
-// export default i18n;
