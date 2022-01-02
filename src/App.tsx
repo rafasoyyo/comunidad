@@ -1,6 +1,7 @@
 import React from 'react';
 import './translations/i18n';
 import { useTranslation } from 'react-i18next';
+import { Text } from '@chakra-ui/react';
 import logo from './logo.svg';
 import './App.css';
 
@@ -19,8 +20,8 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {t('welcome')}
-          Learn React
+          <Text>{t('welcome')}</Text>
+          <Text>Learn React</Text>
         </a>
       </header>
     </div>
