@@ -58,16 +58,16 @@ export interface ConfigInterface {
 
 export const ConfigContext = createContext({} as ConfigInterface);
 
-export const getConfig = async (): Promise<ConfigInterface | any> => {
-    let result: ConfigInterface | Error;
-    try {
-        const snapshot = await get(child(ref(database), `config`))
-        result = snapshot.exists()
-            ? { modules: (modules || []), ...snapshot.val() }
-            : new Error('No date found');
-    } catch (e: any) {
-        result = e;
-    }
-    // console.log(result);
-    return result;
+export const getConfig = (): Promise<ConfigInterface | any> => {
+    return new Promise((resolve, reject) => {
+        get(child(ref(database), `config`))
+            .then(snapshot => {
+                if (snapshot.exists()) {
+                    resolve({ modules: (modules || []), ...snapshot.val() })
+                } else {
+                    reject(new Error('No date found'));
+                }
+            })
+            .catch(reject);
+    });
 };

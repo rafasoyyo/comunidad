@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,13 +8,6 @@ import {
     FormErrorMessage,
     FormLabel,
     Input,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
     SimpleGrid,
     Text,
     useDisclosure
@@ -30,13 +24,20 @@ import AuthService from '../services/auth';
 const userService: UserService = new UserService();
 const authService: AuthService = new AuthService();
 
+interface UserPageProps {
+    displayUsers?: UserInterface[],
+    setDisplayUsers?: React.Dispatch<React.SetStateAction<UserInterface[]>>,
+    allUsers?: UserInterface[],
+    setAllUsers?: React.Dispatch<React.SetStateAction<UserInterface[]>>,
+    openModal: Function
+}
 export default function Users(props: {
     config: ConfigInterface
 }): React.ReactElement {
     const [isLoading, setLoading] = useState(true);
     const [allUsers, setAllUsers] = useState([] as UserInterface[]);
     const [displayUsers, setDisplayUsers] = useState([] as UserInterface[]);
-    const [selectedUser, setSelectedUser] = useState({} as UserInterface);
+    const [userData, setUserData] = useState({} as UserInterface);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const getUserList = () => {
@@ -54,88 +55,120 @@ export default function Users(props: {
     }
 
     const closeModal = (): void => {
+        console.log('closeModal', userData);
         getUserList();
         onClose();
     };
 
     const openModal = (u: UserInterface) => {
-        // console.log({ openModal });
-        setSelectedUser(u);
+        console.log('openModal');
+        setUserData(u);
         onOpen();
     }
 
-    useEffect(() => getUserList(), []);
+    const [isSaving, setSaving] = useState(false);
+    const [isSavingAndClosing, setSavingAndClosing] = useState(false);
 
-    useEffect(() => console.log('displayUsers'), [displayUsers]);
+    const save = async () => {
+        console.log('save', { userData })
+        setSaving(true);
+        typeof userData.id === 'undefined'
+            ? await authService.createUser(userData.email)
+            : await userService.edit(userData);
+        setSaving(false);
+    }
+
+    const saveAndClose = async (e: React.FormEvent<HTMLFormElement>) => {
+        console.log('saveAndClose', { userData })
+        e.preventDefault();
+        setSavingAndClosing(true);
+        typeof userData.id === 'undefined'
+            ? await authService.createUser(userData.email)
+            : await userService.edit(userData);
+        setSavingAndClosing(false);
+        closeModal()
+    }
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        setUserData({ ...userData, email: (e.target.value).trim() })
+    };
+
+    useEffect(() => getUserList(), []);
 
     return (
         <>
             <Layout
                 isLoading={isLoading}
-                main={
-                    <UserPageComponent
-                        displayUsers={displayUsers}
-                        openModal={openModal} />
-                }
+                // main={
+                //     <UserPageComponent
+                //         displayUsers={displayUsers}
+                //         openModal={openModal} />
+                // }
+                mainProps={{
+                    component: (props: {
+                        userData: UserInterface,
+                        openModal: Function
+                    }): React.ReactElement => {
+                        return <UserPageComponent userData={props.userData} openModal={props.openModal} />
+                    },
+                    displayUsers,
+                    openModal
+                }}
                 lateral={
                     <UserPageFilter
                         allUsers={allUsers}
                         setDisplayUsers={setDisplayUsers}
                         openModal={openModal} />
                 }
+                modalProps={{
+                    component: (props: {
+                        userData: UserInterface,
+                        setUserData: Function
+                    }): React.ReactElement => {
+                        return <HandleUserModal
+                            userData={props.userData}
+                            setUserData={props.setUserData}
+                            handleEmailChange={handleEmailChange}
+                        />
+                    },
+                    save,
+                    saveAndClose,
+                    isSaving,
+                    isSavingAndClosing,
+                    isOpen,
+                    userData,
+                    setUserData,
+                    closeModal,
+                    handleEmailChange
+                }}
             />
-            <HandleUserModal
-                isOpen={isOpen}
-                userData={selectedUser}
-                closeModal={closeModal} />
         </>
     );
 }
 
 const UserPageComponent = (props: {
-    displayUsers: UserInterface[],
+    userData: UserInterface,
     openModal: Function
 }): React.ReactElement => {
     const { t } = useTranslation();
-
+    const user = props.userData;
+    // console.log('1 selectedUser: ', props.selectedUser);
+    // console.log('2 user: ', user);
     return (
-        <SimpleGrid
-            columns={2}
-            spacing={2}>
-            {
-                (props.displayUsers || [])
-                    // .sort((a, b) => {
-                    //     const valA = { ...a } as unknown as Record<any, any>
-                    //     const valB = { ...b } as unknown as Record<any, any>
-                    //     // const valueA = (new Date((valB['createdAt']) || 0 )).getTime();
-                    //     // const valueB = (new Date((valB['createdAt']) || 0 )).getTime();
-                    //     console.log(new Date(valA['createdAt']), new Date(valB['createdAt']));
-                    //     console.log(valA['createdAt'], valB['createdAt']);
-                    //     console.log(valA['createdAt'] - valB['createdAt']);
-                    //     console.log(valA['email'], valB['email']);
-                    //     console.log(valA['email'] - valB['email']);
-                    //     console.log(valA['email'] > valB['email']);
-                    //     console.log(valA['email'] < valB['email']);
-                    //     return valA['email'] > valB['email'] ? 1 : -1;
-                    // })
-                    // .sort(sorter.default('email'))
-                    .map((user) => (
-                        <Box
-                            key={user.id}
-                            boxShadow='base'
-                            minH='100px'
-                            bg='gray.100'
-                            border='1px'
-                            borderColor='gray.50'
-                            p="5"
-                            cursor='pointer'
-                            onClick={() => props.openModal(user)}>
-                            <Text>{user.email}</Text>
-                            <Text>{String(user.createdAt?.toDate().toLocaleDateString())}</Text>
-                        </Box>
-                    ))
-            }
-        </SimpleGrid>
+        <Box
+            key={user.id}
+            boxShadow='base'
+            minH='100px'
+            bg='gray.100'
+            border='1px'
+            borderColor='gray.50'
+            p="5"
+            cursor='pointer'
+            onClick={() => props.openModal(user)}>
+            <Text>{user.email}</Text>
+            <Text>{String(user.createdAt?.toDate().toLocaleDateString())}</Text>
+        </Box>
     )
 }
 
@@ -145,7 +178,6 @@ const UserPageFilter = (props: {
     openModal: Function
 }): React.ReactElement => {
     const { t } = useTranslation();
-    const user = {} as UserInterface;
     const [sortDir, setSortDir] = useState(true);
 
     let userListDisplay: UserInterface[] = props.allUsers;
@@ -166,7 +198,7 @@ const UserPageFilter = (props: {
             <Button
                 w="100%"
                 colorScheme='teal'
-                onClick={() => props.openModal(user)}>
+                onClick={() => props.openModal({} as UserInterface)}>
                 {t('users.add')}
             </Button>
 
@@ -220,83 +252,58 @@ const UserPageFilter = (props: {
 };
 
 const HandleUserModal = (props: {
-    isOpen: boolean,
     userData: UserInterface,
-    closeModal: Function
+    setUserData: Function,
+    handleEmailChange: Function
 }): React.ReactElement => {
     const { t } = useTranslation();
-    const [user, setUser] = useState({} as UserInterface);
-    const [isSaving, setSaving] = useState(false);
-    const [isSavingAndClosing, setSavingAndClosing] = useState(false);
+    // const [user, setUser] = useState(props.userData);
+    console.log(props.userData);
 
-    const save = async () => {
-        setSaving(true);
-        typeof user.id === 'undefined'
-            ? await authService.createUser(user.email)
-            : await userService.edit(user);
-        setSaving(false);
-    }
-
-    const saveAndClose = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        setSavingAndClosing(true);
-        typeof user.id === 'undefined'
-            ? await authService.createUser(user.email)
-            : await userService.edit(user);
-        setSavingAndClosing(true);
-        props.closeModal()
-    }
+        props.setUserData({ ...props.userData, name: (e.target.value).trim() })
+    };
+
+    // const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     e.preventDefault();
+    //     props.setUserData({ ...props.userData, email: (e.target.value).trim() })
+    // };
 
     return (
-        <Modal isOpen={props.isOpen} onClose={() => props.closeModal()} >
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Modal Title</ModalHeader>
-                <ModalCloseButton />
-                <form onSubmit={saveAndClose} noValidate>
-                    <ModalBody>
-                        <FormControl isRequired mt="2">
-                            <FormLabel
-                                htmlFor='email'
-                                type="email">
-                                {t('form.email')}
-                            </FormLabel>
-                            <Input
-                                id='loginEmail'
-                                placeholder={t('form.email')}
-                                defaultValue={props.userData.email}
-                                onChange={(e) => setUser({ ...props.userData, email: (e.target.value).trim() })}></Input>
-                            <FormErrorMessage>{t('error.required')}</FormErrorMessage>
-                        </FormControl>
-                    </ModalBody>
-
-                    <ModalFooter my="6">
-                        <Button
-                            id='saveandclose'
-                            type="submit"
-                            colorScheme='teal'
-                            isLoading={isSavingAndClosing}
-                            rightIcon={<ArrowForwardIcon w={5} h={5} />} >
-                            {t('form.saveandclose')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            colorScheme='teal'
-                            isLoading={isSaving}
-                            onClick={save}
-                            rightIcon={<ArrowForwardIcon w={5} h={5} />} >
-                            {t('form.save')}
-                        </Button>
-                        <Button
-                            colorScheme='red'
-                            mx={3}
-                            rightIcon={<CloseIcon w={3} h={3} />}
-                            onClick={() => props.closeModal()} >
-                            {t('form.close')}
-                        </Button>
-                    </ModalFooter>
-                </form>
-            </ModalContent>
-        </Modal>
+        <>
+            <FormControl isRequired mt="2">
+                <FormLabel
+                    htmlFor='name'
+                    type="text">
+                    {t('form.name')}
+                </FormLabel>
+                <Input
+                    key="editorName"
+                    id='editorName'
+                    placeholder={t('form.name')}
+                    value={props.userData.name}
+                    onChange={handleNameChange}
+                >
+                </Input>
+                <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+            </FormControl>
+            <FormControl isRequired mt="2">
+                <FormLabel
+                    htmlFor='email'
+                    type="email">
+                    {t('form.email')}
+                </FormLabel>
+                <Input
+                    key="editorEmail"
+                    id='editorEmail'
+                    placeholder={t('form.email')}
+                    value={props.userData.email}
+                    onChange={(e)=> props.handleEmailChange(e)}
+                >
+                </Input>
+                <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+            </FormControl>
+        </>
     )
 }

@@ -4,6 +4,8 @@ import { Button, Text } from '@chakra-ui/react';
 
 import { ConfigInterface } from '../services/config';
 import UserService, { UserInterface } from '../services/users';
+import createCredentials from '../helpers/credentials';
+import { UserContext } from '../services/auth';
 
 function Profile(props: {
     config: ConfigInterface,
@@ -15,6 +17,7 @@ function Profile(props: {
     const [community, setCommunity] = useState(props.config.community);
     const [userData, setUserData] = useState({} as UserInterface);
     const userService = new UserService();
+
 
     useEffect(() => {
         userService
@@ -31,11 +34,18 @@ function Profile(props: {
     }, []);
 
     return (
-        <>
-            <Text>Profile {userData.email}</Text>
-            <Text>{t('welcome')} {community.name}</Text>
-            <Button onClick={() => { userService.delete(userData.id)} }> Delete</Button>
-        </>
+        <UserContext.Consumer>
+            {
+                ({ email }) => (
+                    <>
+                        <Text>Profile {email}</Text>
+                        <Text>{t('welcome')} {community.name}</Text>
+                        <Button onClick={() => { userService.delete(userData.id) }}> Delete</Button>
+                        <Button onClick={createCredentials}> Create Credentials</Button>
+                    </>
+                )
+            }
+        </UserContext.Consumer>
     );
 }
 

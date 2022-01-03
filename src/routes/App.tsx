@@ -43,26 +43,18 @@ function App(): React.ReactElement {
 
 	const [isAuth, setAuth] = useState(false);
 	const [userData, setUserData] = useState({} as UserInterface);
-	const getUser: Function = async (loggedUser: User): Promise<UserInterface | undefined> => {
-		let userFound;
-		console.log('1: ', {loggedUser});
-		console.log('1: ', {userFound});
-		if (loggedUser) {
-			userFound = await userService.get(loggedUser.uid) as UserInterface;
-			setUserData(userFound);
-		}
-		console.log('2: ', {userFound});
-		return userFound;
+	const getUser: Function = async (loggedUser: User): Promise<UserInterface | void> => {
+		return loggedUser && userService
+			.get(loggedUser.uid)
+			.then(userFound => setUserData(userFound as UserInterface))
+			.catch(error => console.error(error));
 	};
 
 	useEffect(() => {
 		getConfig()
 			.then(async (config: ConfigInterface) => {
 				setConfig(config);
-				console.log({config});
-				const authState = await authService.getAuthState();
-				console.log({authState});
-				await getUser(authState);
+				await getUser(await authService.getAuthState());
 				setLoading(false);
 			})
 			.catch((e) => {

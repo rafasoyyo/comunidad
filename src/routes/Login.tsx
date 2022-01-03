@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import {
 	Box,
 	Button,
+	Center,
 	Checkbox,
 	Container,
 	FormControl,
 	FormErrorMessage,
 	FormLabel,
+	Icon,
 	Input,
 	InputGroup,
 	InputRightElement,
@@ -15,6 +17,7 @@ import {
 	Text
 } from '@chakra-ui/react'
 import { ArrowForwardIcon } from '@chakra-ui/icons';
+import * as bs from 'react-icons/bs'
 import { ErrorInterface } from "../services/abstractInterface";
 import AuthService, { User } from '../services/auth';
 // import { Link as RouteLink} from 'react-router-dom';
@@ -70,6 +73,16 @@ function Login(props: {
 		setLoading(false);
 	}
 
+	const getCredentials = (): void => {
+		navigator.credentials.get()
+			.then((e) => {
+				console.log('then: ', e);
+			})
+			.catch((e) => {
+				console.log('catch: ', e);
+			});
+	}
+
 	return (
 		<Box
 			backgroundImage={image}
@@ -118,14 +131,27 @@ function Login(props: {
 								onChange={(e) => setPassword(e.target.value)}
 								onFocus={() => setPasswordError(false)}
 								onBlur={(e) => setPasswordError(e.target.value.length === 0)} />
-							<InputRightElement width='4.5rem' right="1">
-								<Button h='1.75rem' size='sm' bg="gray.400" onClick={() => setShowPass(!showPass)}>
-									{showPass ? t('form.hide') : t('form.show')}
+							<InputRightElement width='2rem' right="1">
+								<Button
+									h='1.75rem'
+									size='xs'
+									px="2"
+									variant="outline"
+									color='gray.600'
+									borderColor='gray.400'
+									onClick={() => setShowPass(!showPass)}>
+									{showPass ? <Icon as={bs.BsFillEyeSlashFill} /> : <Icon as={bs.BsFillEyeFill} />}
 								</Button>
 							</InputRightElement>
 						</InputGroup>
 						<FormErrorMessage>{t('error.required')}</FormErrorMessage>
 					</FormControl>
+					<Link href='/forgot-password' align="right">
+						<Text
+							color="blue.700"
+							fontSize="sm"> Necesito recuperar mi contraseña
+						</Text>
+					</Link>
 
 					<FormControl isInvalid={privacyError} mt="4">
 						<Checkbox
@@ -139,9 +165,32 @@ function Login(props: {
 						<FormErrorMessage>{t('error.required')}</FormErrorMessage>
 					</FormControl>
 
-					<Button type="submit" my="6" w="100%" rightIcon={<ArrowForwardIcon />} isLoading={isLoading}>{t('form.enter')}</Button>
+					<Button
+						type="submit"
+						my="6"
+						w="100%"
+						color="white"
+						bg="blue.500"
+						rightIcon={<ArrowForwardIcon />}
+						isLoading={isLoading}>
+						{t('form.enter')}
+					</Button>
 					{formError && <p>{t(formError)}</p>}
 				</form>
+				<Center mt="6">
+					<Text
+						fontSize="sm">¿Aún no tienes cuenta?
+						<Button
+							type="button"
+							mx="2"
+							size="sm"
+							variant="outline"
+							colorScheme='teal'
+							onClick={getCredentials} >
+							Crea una ahora
+						</Button>
+					</Text>
+				</Center>
 			</Container >
 		</Box>
 	);
