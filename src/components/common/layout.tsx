@@ -15,28 +15,32 @@ function Layout(props: {
     main?: React.ReactElement,
     mainProps?: any,
     lateral?: React.ReactElement,
+    lateralProps?: any,
     modalProps?: any,
 }): React.ReactElement {
 
     const {
-        component: Maincomponent,
-        displayUsers,
-        openModal
+        component: MainComponent,
+        displayUsers: MainDisplayUsers,
+        openModal: MainOpenModal,
+        setTitle: MainSetTitle,
     } = (props.mainProps || {});
 
     const {
-        component: ModalComponent,
-        save,
-        saveAndClose,
-        isSaving,
-        isSavingAndClosing,
-        isOpen,
-        userData,
-        setUserData,
-        closeModal,
-        handleEmailChange
-    } = (props.modalProps || {});
+        component: LateralComponent,
+        allUsers,
+        setDisplayUsers,
+        openModal,
+        setTitle,
+    } = (props.lateralProps || {});
 
+    const {
+        component: ModalComponent,
+        isOpen,
+        itemData,
+        closeModal,
+        title
+    } = (props.modalProps || {});
 
     return (
         !props.isLoading
@@ -55,7 +59,15 @@ function Layout(props: {
                         borderRight='1px'
                         borderColor='gray.300'
                         h='calc(100vh - 91px)'>
-                        {props.lateral}
+                        {
+                            props.lateral
+                                ? props.lateral
+                                : <LateralComponent
+                                    allUsers={allUsers}
+                                    setDisplayUsers={setDisplayUsers}
+                                    openModal={openModal}
+                                    setTitle={setTitle} />
+                        }
                     </GridItem>
 
                     <GridItem
@@ -71,13 +83,13 @@ function Layout(props: {
                                     columns={2}
                                     spacing={2}>
                                     {
-                                        (
-                                            (displayUsers || []).map((user: any) => (
-                                                <Box key={user.id}>
-                                                    <Maincomponent userData={user} openModal={openModal} />
-                                                </Box>
-                                            ))
-                                        )
+                                        (MainDisplayUsers || []).map((user: any) => (
+                                            <MainComponent
+                                                key={user.id}
+                                                userData={user}
+                                                openModal={MainOpenModal}
+                                                setTitle={MainSetTitle} />
+                                        ))
                                     }
                                 </SimpleGrid >
                         }
@@ -91,42 +103,11 @@ function Layout(props: {
                     >
                         <ModalOverlay />
                         <ModalContent>
-                            <ModalHeader>Modal Title</ModalHeader>
+                            <ModalHeader>{title}</ModalHeader>
                             <ModalCloseButton />
-                            <ModalBody>
-                                <form onSubmit={saveAndClose} noValidate>
-                                    <ModalComponent
-                                        userData={userData}
-                                        setUserData={setUserData}
-                                        handleEmailChange={handleEmailChange} />
-                                </form>
-                            </ModalBody>
-                            <ModalFooter my="6">
-                                <Button
-                                    id='saveandclose'
-                                    type="submit"
-                                    colorScheme='teal'
-                                    isLoading={isSavingAndClosing}
-                                    onClick={saveAndClose}
-                                    rightIcon={<ArrowForwardIcon w={5} h={5} />} >
-                                    {t('form.saveandclose')}
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    colorScheme='teal'
-                                    isLoading={isSaving}
-                                    onClick={save}
-                                    rightIcon={<ArrowForwardIcon w={5} h={5} />} >
-                                    {t('form.save')}
-                                </Button>
-                                <Button
-                                    colorScheme='red'
-                                    mx={3}
-                                    rightIcon={<CloseIcon w={3} h={3} />}
-                                    onClick={() => closeModal()} >
-                                    {t('form.close')}
-                                </Button>
-                            </ModalFooter>
+                            <ModalComponent
+                                itemData={itemData}
+                                closeModal={closeModal} />
                         </ModalContent>
                     </Modal>
                 }

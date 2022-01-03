@@ -64,10 +64,7 @@ function Login(props: {
 			// eslint-disable-next-line no-extra-boolean-cast
 			setFormError(!!errorCode ? errorCode : loginErrorStates['default']);
 		} else {
-			console.log('one');
-			const data = await props.getUser(userlogin)
-
-			console.log('two', { data });
+			const data = await props.getUser(userlogin);
 			props.setAuth(true);
 		}
 		setLoading(false);
