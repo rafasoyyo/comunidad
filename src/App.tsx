@@ -34,7 +34,7 @@ function App() {
     <p>loading</p>
   ) : (
     <ConfigContext.Provider value={config}>
-      <img src={config.getBackgroundImage()} alt="" />
+      <img src={config.getBackgroundImage()} alt="backgroundImage" />
       <BrowserRouter>
         <Routes>
           <Route path={t('rdefault')} element={<Default />} />
