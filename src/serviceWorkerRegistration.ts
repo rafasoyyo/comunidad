@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 // This optional code is used to register a service worker.
 // register() is not called by default.
 
@@ -104,7 +105,7 @@ function registerValidSW(swUrl: string, config?: Config) {
 function checkValidServiceWorker(swUrl: string, config?: Config) {
   // Check if the service worker can be found. If it can't reload the page.
   fetch(swUrl, {
-    headers: { 'Service-Worker': 'script' },
+    headers: { 'Service-Worker': 'script' }
   })
     .then((response) => {
       // Ensure service worker exists, and that we really are getting a JS file.

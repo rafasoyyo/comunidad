@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+source $HOME/.nvm/nvm.sh
+nvm use 16
+yarn test
