@@ -19,7 +19,6 @@ const configService = new ConfigService();
 
 const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.ReactElement => {
   const { t } = useTranslation();
-
   const [singOutLoading, setSingOutLoading] = useState(false);
 
   const singOut = async () => {

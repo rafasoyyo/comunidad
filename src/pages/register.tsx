@@ -5,7 +5,6 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
-  AlertTitle,
   Button,
   Center,
   Checkbox,
@@ -28,9 +27,9 @@ import { AuthService } from '../core/services';
 import UserClass from '../core/user/userClass';
 import Layout from '../components/noAuth';
 
-export default function Register(props: { setUser: Function }): React.ReactElement {
-  const authService = new AuthService();
+const authService = new AuthService();
 
+export default function Register(props: { setUser: Function }): React.ReactElement {
   const { t } = useTranslation();
   const [formError, setFormError] = useState('');
   const [name, setName] = useState('');
@@ -65,11 +64,8 @@ export default function Register(props: { setUser: Function }): React.ReactEleme
     const user: UserClass | ErrorInterface = await authService.createUser(name, email, password);
     if ((user as ErrorInterface).error) {
       const msg = (user as ErrorInterface).code;
-      console.log({ msg });
       setFormError(t('error.' + msg, defaultErrorMsg));
     } else {
-      // const data = await props.getUser(userlogin);
-      console.log({ user });
       props.setUser(user);
     }
     setLoading(false);

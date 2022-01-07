@@ -17,9 +17,9 @@ import * as bs from 'react-icons/bs';
 import { AuthService } from '../core/services';
 import Layout from '../components/noAuth';
 
-export default function Password(): React.ReactElement {
-  const authService = new AuthService();
+const authService = new AuthService();
 
+export default function Password(): React.ReactElement {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState(false);
@@ -28,6 +28,10 @@ export default function Password(): React.ReactElement {
   const defaultErrorMsg = t('error.default');
   const handlePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!email.length) {
+      if (!email.length) setEmailError(true);
+      return;
+    }
     setLoading(true);
     authService
       .sendPasswordResetEmail(email)

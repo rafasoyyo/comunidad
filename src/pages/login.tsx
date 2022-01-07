@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link as ReachLink } from 'react-router-dom';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Button,
   Center,
   Checkbox,
+  CloseButton,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -23,9 +27,9 @@ import { AuthService } from '../core/services';
 import UserClass from '../core/user/userClass';
 import Layout from '../components/noAuth';
 
-export default function Login(props: { setUser: Function }): React.ReactElement {
-  const authService = new AuthService();
+const authService = new AuthService();
 
+export default function Login(props: { setUser: Function }): React.ReactElement {
   const { t } = useTranslation();
   const [formError, setFormError] = useState('');
   const [email, setEmail] = useState('');
@@ -51,11 +55,9 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
     const error = user as ErrorInterface;
     console.log({ error });
     if (error.error) {
-      const msg = 'error.' + String(error.msg).replace(/[\s]/gi, '').replace(/[^\w]/gi, '_');
-      console.log({ msg }, t(msg));
-      setFormError(t(msg, defaultErrorMsg));
+      const msg = (user as ErrorInterface).code;
+      setFormError(t('error.' + msg, defaultErrorMsg));
     } else {
-      console.log({ user }, (user as UserClass).getItem('admin'));
       props.setUser(user);
     }
     setLoading(false);
@@ -150,7 +152,13 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
         >
           {t('form.enter')}
         </Button>
-        {formError && <p>{t(formError)}</p>}
+        {formError && (
+          <Alert status="error">
+            <AlertIcon />
+            <AlertDescription>{t(formError)}</AlertDescription>
+            <CloseButton position="absolute" right="8px" top="8px" />
+          </Alert>
+        )}
       </form>
       <Center mt="6">
         <Text>

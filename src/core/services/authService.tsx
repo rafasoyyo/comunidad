@@ -54,13 +54,11 @@ export default class AuthService {
       const userClass = await this.getUserClass(user);
       result = userClass as UserClass;
     } catch (e: any) {
-      console.error(e, e.message, e.code);
       result = {
         error: true,
         msg: e.message,
         code: e.code.replace(/[\W]/g, '_')
       } as ErrorInterface;
-      console.log({ result });
     }
     return result;
   };
@@ -83,8 +81,11 @@ export default class AuthService {
       const userClass = await this.getUserClass(userCredential.user);
       result = userClass as UserClass;
     } catch (e: any) {
-      console.error(e);
-      result = { error: true, msg: e.message } as ErrorInterface;
+      result = {
+        error: true,
+        msg: e.message,
+        code: e.code.replace(/[\W]/g, '_')
+      } as ErrorInterface;
     }
     return result;
   };
