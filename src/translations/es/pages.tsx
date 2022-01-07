@@ -16,7 +16,9 @@ const Pages = {
     loginAccount: 'Inicia sesión'
   },
   password: {
-    title: 'Recupera tu contraseña'
+    title: 'Recupera tu contraseña',
+    emailSent:
+      'Se ha enviado un email, por favor revisa tu bandeja de entrada de correo electronico'
   },
   offline: {
     title: 'No es posible conectarse a internet en este momento.'

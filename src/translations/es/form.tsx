@@ -19,6 +19,7 @@ const Forms = {
     auth_user_not_found: 'Usuario o contraseña incorrectos',
     auth_email_already_in_use: 'Este correo ya está en uso',
     auth_weak_password: 'La contraseña debe tener al menos 6 caracteres',
+    auth_invalid_email: 'Email inválido',
     passwordMatch: 'Las contraseñas no coinciden',
     required: 'Este campo es obligatorio',
     default: 'Ups! Algo ha salido mal'

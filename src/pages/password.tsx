@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link as ReachLink } from 'react-router-dom';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Button,
   Center,
   FormControl,
@@ -16,6 +19,7 @@ import * as bs from 'react-icons/bs';
 
 import { AuthService } from '../core/services';
 import Layout from '../components/noAuth';
+import { ErrorInterface } from '../core/interfaces';
 
 const authService = new AuthService();
 
@@ -23,6 +27,8 @@ export default function Password(): React.ReactElement {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailSentError, setEmailSentError] = useState('');
   const [isLoading, setLoading] = useState(false);
 
   const defaultErrorMsg = t('error.default');
@@ -32,11 +38,18 @@ export default function Password(): React.ReactElement {
       if (!email.length) setEmailError(true);
       return;
     }
+    setEmailSentError('');
+    setEmailSent(false);
     setLoading(true);
-    authService
-      .sendPasswordResetEmail(email)
-      .then(() => setLoading(false))
-      .catch(() => setLoading(false));
+    const result = await authService.sendPasswordResetEmail(email);
+    const emailResult = result as ErrorInterface;
+    if (emailResult.error && String(emailResult.code) === 'auth_invalid_email') {
+      const msg = (emailResult as ErrorInterface).code;
+      setEmailSentError(t('error.' + msg, defaultErrorMsg));
+    } else {
+      setEmailSent(true);
+    }
+    setLoading(false);
   };
 
   return (
@@ -72,6 +85,18 @@ export default function Password(): React.ReactElement {
           {t('form.send')}
         </Button>
       </form>
+      {emailSent && (
+        <Alert status="success">
+          <AlertIcon />
+          <AlertDescription>{t('password.emailSent')}</AlertDescription>
+        </Alert>
+      )}
+      {emailSentError && (
+        <Alert status="error">
+          <AlertIcon />
+          <AlertDescription>{t(emailSentError)}</AlertDescription>
+        </Alert>
+      )}
       <Center mt="6">
         <Text>
           {t('register.alreadyAccount')}

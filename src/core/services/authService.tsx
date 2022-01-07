@@ -127,7 +127,17 @@ export default class AuthService {
    * @param email User email
    * @returns Promise<void>
    */
-  sendPasswordResetEmail(email: string): Promise<void> {
-    return sendPasswordResetEmail(auth, email);
-  }
+  sendPasswordResetEmail = async (email: string): Promise<void | ErrorInterface> => {
+    let result: void | ErrorInterface;
+    try {
+      result = await sendPasswordResetEmail(auth, email);
+    } catch (e: any) {
+      result = {
+        error: true,
+        msg: e.message,
+        code: e.code.replace(/[\W]/g, '_')
+      } as ErrorInterface;
+    }
+    return result;
+  };
 }

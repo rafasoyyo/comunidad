@@ -52,9 +52,7 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
     }
     setLoading(true);
     const user: UserClass | ErrorInterface = await authService.loginUser(email, password);
-    const error = user as ErrorInterface;
-    console.log({ error });
-    if (error.error) {
+    if ((user as ErrorInterface).error) {
       const msg = (user as ErrorInterface).code;
       setFormError(t('error.' + msg, defaultErrorMsg));
     } else {
