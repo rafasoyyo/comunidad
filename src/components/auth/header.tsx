@@ -29,9 +29,9 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from '@chakra-ui/icons';
 
-import { ConfigContext } from '../core/contexts';
-import { ConfigInterface, ErrorInterface, ModuleInterface } from '../core/interfaces';
-import UserClass from '../core/user/userClass';
+import { ConfigContext } from '../../core/contexts';
+import { ConfigInterface, ErrorInterface, ModuleInterface } from '../../core/interfaces';
+import UserClass from '../../core/user/userClass';
 
 const activeStyle = {
   position: 'relative',

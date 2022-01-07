@@ -4,7 +4,7 @@ import { Button, Center, Text } from '@chakra-ui/react';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import * as bs from 'react-icons/bs';
 
-import Layout from '../../components/noAuth';
+import { NoAuthLayout } from '../../components/noAuth/';
 
 export default function NotVerified(props: {
   singOut: MouseEventHandler<HTMLButtonElement>;
@@ -13,7 +13,7 @@ export default function NotVerified(props: {
   const { t } = useTranslation();
 
   return (
-    <Layout>
+    <NoAuthLayout>
       <Text fontSize="3xl" align="center" mt="3" mb="4">
         {t('notVerified.title')}
       </Text>
@@ -22,6 +22,6 @@ export default function NotVerified(props: {
           {t('form.singOut')}
         </Button>
       </Center>
-    </Layout>
+    </NoAuthLayout>
   );
 }

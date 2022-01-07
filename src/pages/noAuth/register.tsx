@@ -25,7 +25,7 @@ import * as bs from 'react-icons/bs';
 import { ErrorInterface } from '../../core/interfaces';
 import { AuthService } from '../../core/services';
 import UserClass from '../../core/user/userClass';
-import Layout from '../../components/noAuth';
+import { NoAuthLayout } from '../../components/noAuth';
 
 const authService = new AuthService();
 
@@ -72,7 +72,7 @@ export default function Register(props: { setUser: Function }): React.ReactEleme
   };
 
   return (
-    <Layout>
+    <NoAuthLayout>
       <Text fontSize="3xl" align="center" mt="3" mb="4">
         {t('register.title')}
       </Text>
@@ -221,6 +221,6 @@ export default function Register(props: { setUser: Function }): React.ReactEleme
           </Link>
         </Text>
       </Center>
-    </Layout>
+    </NoAuthLayout>
   );
 }

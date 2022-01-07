@@ -18,7 +18,7 @@ import { ArrowForwardIcon } from '@chakra-ui/icons';
 import * as bs from 'react-icons/bs';
 
 import { AuthService } from '../../core/services';
-import Layout from '../../components/noAuth';
+import { NoAuthLayout } from '../../components/noAuth';
 import { ErrorInterface } from '../../core/interfaces';
 
 const authService = new AuthService();
@@ -53,7 +53,7 @@ export default function Password(): React.ReactElement {
   };
 
   return (
-    <Layout>
+    <NoAuthLayout>
       <Text fontSize="3xl" align="center" mt="3" mb="4">
         {t('password.title')}
       </Text>
@@ -105,6 +105,6 @@ export default function Password(): React.ReactElement {
           </Link>
         </Text>
       </Center>
-    </Layout>
+    </NoAuthLayout>
   );
 }

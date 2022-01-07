@@ -1,14 +1,9 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Box, Container, Flex, Spinner, Text } from '@chakra-ui/react';
-import { ConfigContext } from '../core/contexts';
-import { ConfigInterface } from '../core/interfaces';
+import { ConfigContext } from '../../core/contexts';
+import { ConfigInterface } from '../../core/interfaces';
 
-const animation = `
-  background-color: red;
-`;
-
-export default function Layout(props: any): React.ReactElement {
+export default function NoAuthLayout(props: any): React.ReactElement {
   return (
     <ConfigContext.Consumer>
       {(config: ConfigInterface) => (
@@ -41,15 +36,3 @@ export default function Layout(props: any): React.ReactElement {
     </ConfigContext.Consumer>
   );
 }
-
-export const NoAuthLoader = (): React.ReactElement => {
-  const { t } = useTranslation();
-  return (
-    <Flex width="100vw" height="100vh" align="center" justify="center" direction="column">
-      <Spinner size="xl" color="blue.500" thickness="5px" speed="1s" emptyColor="gray.200" />
-      <Box m="2">
-        <Text>{t('loading')}</Text>
-      </Box>
-    </Flex>
-  );
-};

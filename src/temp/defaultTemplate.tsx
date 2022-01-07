@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Text } from '@chakra-ui/react';
-import Header from '../components/header';
+import { Header } from '../components/auth';
 import UserClass from '../core/user/userClass';
 
 function Default(): React.ReactElement {

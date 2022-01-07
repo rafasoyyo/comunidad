@@ -8,7 +8,7 @@ import Default from '../temp/defaultTemplate';
 import Test from '../temp/testTemplate';
 import { Login, NotVerified, Register, Offline, Password } from '../pages';
 import { NoAuthLoader } from '../components/noAuth';
-import Header from '../components/header';
+import { Header } from '../components/auth';
 
 import UserClass from './user/userClass';
 import { ConfigInterface, ErrorInterface } from './interfaces';
@@ -44,6 +44,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    console.log('useEffect', { user });
     authService
       .getAuthState()
       .then((userClass) => setUser(userClass as UserClass))
@@ -75,7 +76,8 @@ const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.Re
   const singOut = (): void => {
     setSingOutLoading(true);
     authService.logoutUser().then((userOut) => {
-      if (!userOut || !(userOut as ErrorInterface).error) {
+      if (userOut && !(userOut as ErrorInterface).error) {
+        console.log({ userOut });
         props.setUser({} as UserClass);
       }
       setSingOutLoading(false);

@@ -25,7 +25,7 @@ import * as bs from 'react-icons/bs';
 import { ErrorInterface } from '../../core/interfaces';
 import { AuthService } from '../../core/services';
 import UserClass from '../../core/user/userClass';
-import Layout from '../../components/noAuth';
+import { NoAuthLayout } from '../../components/noAuth';
 
 const authService = new AuthService();
 
@@ -62,7 +62,7 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
   };
 
   return (
-    <Layout>
+    <NoAuthLayout>
       <Text fontSize="3xl" align="center" mt="3" mb="4">
         {t('login.title')}
       </Text>
@@ -166,6 +166,6 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
           </Link>
         </Text>
       </Center>
-    </Layout>
+    </NoAuthLayout>
   );
 }
