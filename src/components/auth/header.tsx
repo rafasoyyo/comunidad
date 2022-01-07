@@ -36,8 +36,7 @@ import UserClass from '../../core/user/userClass';
 const activeStyle = {
   position: 'relative',
   display: 'flex',
-  backgroundColor: '#CBD5E0',
-  textDecoration: 'underline'
+  backgroundColor: '#CBD5E0'
 };
 
 export default function Header(props: {
@@ -124,7 +123,7 @@ const DesktopNav = () => {
   return (
     <ConfigContext.Consumer>
       {({ modules }: ConfigInterface) => (
-        <Stack direction={'row'}>
+        <Stack direction={'row'} className="headerDesktop">
           {(modules || []).map((navItem: ModuleInterface) => (
             <Box key={navItem.label}>
               <NavLink
@@ -168,10 +167,10 @@ const MobileNav = () => {
           />
           <Drawer isOpen={isOpen} onClose={onClose} placement="left">
             <DrawerOverlay />
-            <DrawerContent>
+            <DrawerContent bg="gray.50">
               <DrawerCloseButton />
               {/* <DrawerHeader></DrawerHeader> */}
-              <Stack bg="gray.800" display={{ md: 'none' }} pt="45">
+              <Stack color="gray.800" display={{ md: 'none' }} pt="45" className="headerMobile">
                 {(modules || []).map((navItem) => (
                   <Stack key={navItem.label} spacing={4}>
                     <NavLink
@@ -187,7 +186,7 @@ const MobileNav = () => {
                         _hover={{ textDecoration: 'none' }}
                       >
                         <Icon as={navItem.icon} />
-                        <Text p="1" fontSize={'xl'} fontWeight={600} color="gray.200">
+                        <Text p="1" fontSize={'xl'} fontWeight={600} color="gray.800">
                           {t(navItem.label)}
                         </Text>
                       </Flex>

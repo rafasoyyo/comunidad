@@ -4,7 +4,7 @@ const Routes = {
   revents: '/eventos',
   rinit: '/inicio',
   rhome: '/',
-  rlands: '/espacios',
+  rspaces: '/espacios',
   rlogin: '/entrada',
   rnotifications: '/notificaciones',
   rpassword: '/password',

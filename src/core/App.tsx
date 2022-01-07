@@ -18,6 +18,10 @@ import { ConfigContext, UserContext } from './contexts';
 const authService = new AuthService();
 const configService = new ConfigService();
 
+/**
+ * Main enter point of the app
+ * @returns React.ReactElement
+ */
 export default function App() {
   const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(true);
@@ -68,6 +72,10 @@ export default function App() {
   );
 }
 
+/**
+ * Loggued id routes management
+ * @returns React.ReactElement
+ */
 const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.ReactElement => {
   const { t } = useTranslation();
   const [singOutLoading, setSingOutLoading] = useState(false);
@@ -114,6 +122,10 @@ const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.Re
   );
 };
 
+/**
+ * Loggued out routes management
+ * @returns React.ReactElement
+ */
 const LoggedOutRoutes = (props: { setUser: Function }): React.ReactElement => {
   const { t } = useTranslation();
   return (

@@ -33,7 +33,7 @@ const Pages = {
     name: 'Notificaciones',
     add: 'Añadir notificación'
   },
-  lands: {
+  spaces: {
     name: 'Espacios'
   },
   events: {
