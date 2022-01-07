@@ -92,7 +92,16 @@ const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.Re
           <main>
             <Routes>
               <Route path={t('rdefault')} element={<Default />} />
-              <Route path={t('rtest')} element={<Test />} />
+              <Route path={t('rhome')} element={<Test />} />
+              <Route path={t('rlogin')} element={<Navigate replace to={t('rhome')} />}></Route>
+              <Route path={t('rinit')} element={<Test />} />
+              <Route path={t('rdocuments')} element={<Default />} />
+              <Route path={t('rnotifications')} element={<Test />} />
+              <Route path={t('rspaces')} element={<Default />} />
+              <Route path={t('revents')} element={<Test />} />
+              <Route path={t('rreceipts')} element={<Default />} />
+              <Route path={t('rusers')} element={<Test />} />
+              <Route path={t('rprofile')} element={<Default />} />
               <Route path="*" element={<Navigate replace to={t('rdefault')} />}></Route>
             </Routes>
             <React.Fragment>
