@@ -4,7 +4,7 @@ import { Button, Center, Text } from '@chakra-ui/react';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import * as bs from 'react-icons/bs';
 
-import Layout from '../components/noAuth';
+import Layout from '../../components/noAuth';
 
 export default function NotVerified(props: {
   singOut: MouseEventHandler<HTMLButtonElement>;

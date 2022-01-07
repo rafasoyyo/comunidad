@@ -94,8 +94,18 @@ export default class AuthService {
    * Logout a user
    * @returns void
    */
-  logoutUser = async (): Promise<void> => {
-    return signOut(auth);
+  logoutUser = async (): Promise<void | ErrorInterface> => {
+    let result: void | ErrorInterface;
+    try {
+      result = (await signOut(auth)) as void;
+    } catch (e: any) {
+      result = {
+        error: true,
+        msg: e.message,
+        code: e.code.replace(/[\W]/g, '_')
+      } as ErrorInterface;
+    }
+    return result;
   };
 
   /**

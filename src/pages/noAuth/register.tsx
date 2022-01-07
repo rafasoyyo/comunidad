@@ -22,10 +22,10 @@ import {
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import * as bs from 'react-icons/bs';
 
-import { ErrorInterface } from '../core/interfaces';
-import { AuthService } from '../core/services';
-import UserClass from '../core/user/userClass';
-import Layout from '../components/noAuth';
+import { ErrorInterface } from '../../core/interfaces';
+import { AuthService } from '../../core/services';
+import UserClass from '../../core/user/userClass';
+import Layout from '../../components/noAuth';
 
 const authService = new AuthService();
 

@@ -1,7 +1,7 @@
-import Login from '../pages/login';
-import NotVerified from '../pages/notVerified';
-import Register from '../pages/register';
-import Offline from '../pages/offline';
-import Password from '../pages/password';
+import Login from './noAuth/login';
+import NotVerified from '../pages/noAuth/notVerified';
+import Register from '../pages/noAuth/register';
+import Offline from '../pages/noAuth/offline';
+import Password from '../pages/noAuth/password';
 
 export { Login, NotVerified, Register, Offline, Password };

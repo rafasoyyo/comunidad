@@ -8,62 +8,17 @@ import Default from '../temp/defaultTemplate';
 import Test from '../temp/testTemplate';
 import { Login, NotVerified, Register, Offline, Password } from '../pages';
 import { NoAuthLoader } from '../components/noAuth';
-import UserClass from './user/userClass';
+import Header from '../components/header';
 
-import { ConfigInterface } from './interfaces';
+import UserClass from './user/userClass';
+import { ConfigInterface, ErrorInterface } from './interfaces';
 import { AuthService, ConfigService } from './services';
 import { ConfigContext, UserContext } from './contexts';
 
 const authService = new AuthService();
 const configService = new ConfigService();
 
-const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.ReactElement => {
-  const { t } = useTranslation();
-  const [singOutLoading, setSingOutLoading] = useState(false);
-
-  const singOut = async () => {
-    setSingOutLoading(true);
-    await authService.logoutUser();
-    props.setUser({} as UserClass);
-    setSingOutLoading(false);
-  };
-
-  return (
-    <UserContext.Provider value={props.user}>
-      {!props.user.isVerified() ? (
-        <NotVerified singOut={singOut} singOutLoading={singOutLoading} />
-      ) : (
-        <BrowserRouter>
-          <Routes>
-            <Route path={t('rdefault')} element={<Default />} />
-            <Route path={t('rtest')} element={<Test />} />
-            <Route path="*" element={<Navigate replace to={t('rdefault')} />}></Route>
-          </Routes>
-          <React.Fragment>
-            <Button onClick={singOut}> {t('form.singOut')} </Button>
-          </React.Fragment>
-        </BrowserRouter>
-      )}
-    </UserContext.Provider>
-  );
-};
-
-const LoggedOutRoutes = (props: { setUser: Function }): React.ReactElement => {
-  const { t } = useTranslation();
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path={t('rdefault')} element={<Navigate replace to={t('rlogin')} />}></Route>
-        <Route path={t('rlogin')} element={<Login setUser={props.setUser} />} />
-        <Route path={t('rregister')} element={<Register setUser={props.setUser} />} />
-        <Route path={t('rpassword')} element={<Password />} />
-        <Route path="*" element={<Navigate replace to={t('rlogin')} />}></Route>
-      </Routes>
-    </BrowserRouter>
-  );
-};
-
-function App() {
+export default function App() {
   const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(true);
   const [config, setConfig] = useState<ConfigInterface>({} as ConfigInterface);
@@ -113,4 +68,54 @@ function App() {
   );
 }
 
-export default App;
+const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.ReactElement => {
+  const { t } = useTranslation();
+  const [singOutLoading, setSingOutLoading] = useState(false);
+
+  const singOut = (): void => {
+    setSingOutLoading(true);
+    authService.logoutUser().then((userOut) => {
+      if (!userOut || !(userOut as ErrorInterface).error) {
+        props.setUser({} as UserClass);
+      }
+      setSingOutLoading(false);
+    });
+  };
+
+  return (
+    <UserContext.Provider value={props.user}>
+      {!props.user.isVerified() ? (
+        <NotVerified singOut={singOut} singOutLoading={singOutLoading} />
+      ) : (
+        <BrowserRouter>
+          <Header user={props.user} singOut={singOut} />
+          <main>
+            <Routes>
+              <Route path={t('rdefault')} element={<Default />} />
+              <Route path={t('rtest')} element={<Test />} />
+              <Route path="*" element={<Navigate replace to={t('rdefault')} />}></Route>
+            </Routes>
+            <React.Fragment>
+              <Button onClick={singOut}> {t('form.singOut')} </Button>
+            </React.Fragment>
+          </main>
+        </BrowserRouter>
+      )}
+    </UserContext.Provider>
+  );
+};
+
+const LoggedOutRoutes = (props: { setUser: Function }): React.ReactElement => {
+  const { t } = useTranslation();
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path={t('rdefault')} element={<Navigate replace to={t('rlogin')} />}></Route>
+        <Route path={t('rlogin')} element={<Login setUser={props.setUser} />} />
+        <Route path={t('rregister')} element={<Register setUser={props.setUser} />} />
+        <Route path={t('rpassword')} element={<Password />} />
+        <Route path="*" element={<Navigate replace to={t('rlogin')} />}></Route>
+      </Routes>
+    </BrowserRouter>
+  );
+};

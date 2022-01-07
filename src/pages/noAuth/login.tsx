@@ -22,10 +22,10 @@ import {
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import * as bs from 'react-icons/bs';
 
-import { ErrorInterface } from '../core/interfaces';
-import { AuthService } from '../core/services';
-import UserClass from '../core/user/userClass';
-import Layout from '../components/noAuth';
+import { ErrorInterface } from '../../core/interfaces';
+import { AuthService } from '../../core/services';
+import UserClass from '../../core/user/userClass';
+import Layout from '../../components/noAuth';
 
 const authService = new AuthService();
 
@@ -52,13 +52,13 @@ export default function Login(props: { setUser: Function }): React.ReactElement 
     }
     setLoading(true);
     const user: UserClass | ErrorInterface = await authService.loginUser(email, password);
+    setLoading(false);
     if ((user as ErrorInterface).error) {
       const msg = (user as ErrorInterface).code;
       setFormError(t('error.' + msg, defaultErrorMsg));
     } else {
       props.setUser(user);
     }
-    setLoading(false);
   };
 
   return (

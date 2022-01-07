@@ -1,5 +1,5 @@
 {
-  "name": "comunidad",
+  "name": "mi-comunidad",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -11,7 +11,10 @@
     "test": "node scripts/test.js --watchAll=false",
     "lint": "eslint src",
     "lint-fix": "eslint src --quiet --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "deploy:all": "npm run build && firebase deploy",
+    "serve": "npm run build && serve -s build"
   },
   "dependencies": {
     "@babel/core": "^7.16.0",
