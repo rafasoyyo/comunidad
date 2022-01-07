@@ -7,8 +7,10 @@ const Routes = {
   rspaces: '/space',
   rlogin: '/login',
   rnotifications: '/notifications',
+  rpassword: '/password',
   rprofile: '/profile',
   rreceipts: '/receipts',
+  rregister: '/register',
   rtest: '/test',
   rusers: '/neighbors'
 };

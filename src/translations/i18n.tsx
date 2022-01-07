@@ -49,3 +49,7 @@ i18n
     fallbackLng: 'es',
     resources
   });
+
+i18n.on('missingKey', function (lngs, namespace, key, res) {
+  console.log(key);
+});

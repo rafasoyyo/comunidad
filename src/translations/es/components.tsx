@@ -10,6 +10,9 @@ const Components = {
     sort: 'Ordenar',
     byEmail: 'Por email',
     byCreation: 'Por fecha de creación'
+  },
+  notVerified: {
+    title: 'Your account is not verified yet.'
   }
 };
 

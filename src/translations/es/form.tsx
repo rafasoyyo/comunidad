@@ -9,14 +9,19 @@ const Forms = {
     send: 'Enviar',
     save: 'Guardar',
     close: 'Cerrar',
+    singOut: 'Cerrar sesión',
     saveandclose: 'Guardar y cerrar',
     show: 'Mostrar',
     hide: 'Ocultar'
   },
   error: {
-    invalidCredentials: 'Usuario o contraseña incorrectos',
-    invalidLogin: 'Usuario o contraseña incorrectos',
-    required: 'Este campo es obligatorio'
+    auth_wrong_password: 'Usuario o contraseña incorrectos',
+    auth_user_not_found: 'Usuario o contraseña incorrectos',
+    auth_email_already_in_use: 'Este correo ya está en uso',
+    auth_weak_password: 'La contraseña debe tener al menos 6 caracteres',
+    passwordMatch: 'Las contraseñas no coinciden',
+    required: 'Este campo es obligatorio',
+    default: 'Ups! Algo ha salido mal'
   }
 };
 

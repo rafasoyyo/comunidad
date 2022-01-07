@@ -1,0 +1,43 @@
+.animated.fadeInFromBottom {
+    animation: fromBottom 750ms cubic-bezier(0, 1, 0.75, 1), fadeIn 750ms cubic-bezier(0.4, 0.4, 0.4, 1);
+    animation-delay: 100ms;
+    animation-fill-mode: forwards;
+    top: 50%;
+    position: relative;
+    opacity: 0;
+}
+
+.animated.fadeIn {
+    animation: fadeIn 750ms linear;
+    animation-delay: 100ms;
+    animation-fill-mode: forwards;
+    opacity: 0;
+}
+
+.animated.fromBottom {
+    animation: fadeInFromBottom 750ms cubic-bezier(0, 1, 0.75, 1);;
+    animation-delay: 100ms;
+    animation-fill-mode: forwards;
+    top: 50%;
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fromBottom {
+    from {
+        transform: translate(0, -20%);
+    }
+
+    to {
+        transform: translate(0, -50%);
+    }
+}

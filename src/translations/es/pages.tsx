@@ -2,10 +2,24 @@ const Pages = {
   login: {
     title: 'Accede a tu cuenta',
     login: 'Entrar',
-    Register: 'Registrarse',
     logout: 'Cerrar sesión',
     privacy1: 'Al hacer clic en Entrar, aceptas nuestros',
-    privacy2: ' Términos y Condiciones'
+    privacy2: ' Términos y Condiciones',
+    resetPassword: 'Necesito restablecer mi contraseña',
+    noAccount: '¿Aún no tienes cuenta?',
+    createAccount: 'Crea una ahora'
+  },
+  register: {
+    title: 'Crea tu cuenta',
+    register: 'Registrarse',
+    alreadyAccount: '¿Ya tienes cuenta?',
+    loginAccount: 'Inicia sesión'
+  },
+  password: {
+    title: 'Recupera tu contraseña'
+  },
+  offline: {
+    title: 'No es posible conectarse a internet en este momento.'
   },
   home: {
     name: 'Inicio'

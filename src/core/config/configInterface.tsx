@@ -1,5 +1,5 @@
 import { IconType } from 'react-icons';
-import { AddressInterface } from './address';
+import { AddressInterface } from '../interfaces';
 
 export interface ModuleInterface {
   id: string;
@@ -8,14 +8,15 @@ export interface ModuleInterface {
   icon: IconType;
 }
 
-export interface ConfigInterface {
+export default interface ConfigInterface {
   community: {
     name: string;
     address: AddressInterface;
   };
   app: {
     modulesId: string;
+    loginBackground?: string;
+    loginBackgrounds: string;
   };
   modules: ModuleInterface[];
-  getBackgroundImage: () => string;
 }

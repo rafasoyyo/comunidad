@@ -35,6 +35,15 @@
         "SharedArrayBuffer": "readonly"
     },
     "rules": {
+        "@typescript-eslint/ban-types": [
+            "error",
+            {
+                "types": {
+                    "Function": false
+                },
+                "extendDefaults": true
+            }
+        ],
         "linebreak-style": "off",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",

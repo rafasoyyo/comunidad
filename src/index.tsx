@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import './index.css';
-import App from './App';
+import App from './core/App';
+
+import './styles/index.css';
 
 ReactDOM.render(
   <React.StrictMode>

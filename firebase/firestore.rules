@@ -2,22 +2,32 @@ rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {
 
+        function getAdminList(){
+            return ['1gy12w8CO7Y3MffHeI4MSnFzlBQ2'];
+        }
+
         function isAuth(){
             return request.auth != null;
         }
 
         function isAdmin(){
-            return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
+            return request.auth.uid in getAdminList();
         }
 
         function isUser(userId){
             return request.auth.uid == userId;
         }
 
-        match /users/{userId}/{documents=**} {
-            allow get: if (isUser() || isAdmin());
-            allow write, delete: if (isUser() || isAdmin());
-            allow list: if isAdmin();
+        function hasAdminData(){
+            return resource != null
+                ? (request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin']))
+                : (request.resource.data.keys().toSet().hasAny(['admin']));
+        }
+
+        match /users/{userId} {
+            allow get: if (isAuth() && (isUser(userId) || isAdmin()));
+            allow write: if (isAuth() && (isAdmin() || (isUser(userId) && !hasAdminData())));
+            allow list: if isAuth() && isAdmin();
         }
 
         match /events/{eventId}/{documents=**} {
