@@ -44,7 +44,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    console.log('useEffect', { user });
     authService
       .getAuthState()
       .then((userClass) => setUser(userClass as UserClass))
@@ -76,11 +75,10 @@ const LoggedInRoutes = (props: { user: UserClass; setUser: Function }): React.Re
   const singOut = (): void => {
     setSingOutLoading(true);
     authService.logoutUser().then((userOut) => {
-      if (userOut && !(userOut as ErrorInterface).error) {
-        console.log({ userOut });
+      setSingOutLoading(false);
+      if (!userOut || !(userOut as ErrorInterface).error) {
         props.setUser({} as UserClass);
       }
-      setSingOutLoading(false);
     });
   };
 

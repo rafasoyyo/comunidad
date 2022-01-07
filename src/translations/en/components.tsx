@@ -12,7 +12,7 @@ const Components = {
     byCreation: 'By creation date'
   },
   notVerified: {
-    title: 'Your account is not verified yet.'
+    title: 'Your account is not verified yet. Please, contact with administration and try again.'
   }
 };
 

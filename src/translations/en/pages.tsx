@@ -20,7 +20,7 @@ const Pages = {
     emailSent: 'An email has been sent to your email address, please check your email inbox'
   },
   offline: {
-    title: 'It is not possible to coonect to internet at this moment.'
+    title: 'It is not possible to connect to internet at this moment.'
   },
   home: {
     name: 'home'

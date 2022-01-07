@@ -12,7 +12,8 @@ const Components = {
     byCreation: 'Por fecha de creación'
   },
   notVerified: {
-    title: 'Your account is not verified yet.'
+    title: `Tu cuenta aún no ha sido verificada. Por favor, 
+    contacta con administración y vuelve a intentarlo.`
   }
 };
 

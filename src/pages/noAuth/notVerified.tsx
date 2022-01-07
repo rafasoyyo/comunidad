@@ -14,7 +14,7 @@ export default function NotVerified(props: {
 
   return (
     <NoAuthLayout>
-      <Text fontSize="3xl" align="center" mt="3" mb="4">
+      <Text fontSize="2xl" align="center" mt="3" mb="4">
         {t('notVerified.title')}
       </Text>
       <Center mt="6">
