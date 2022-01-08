@@ -1,8 +1,6 @@
 import React, {MouseEventHandler} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button, Center, Text} from '@chakra-ui/react';
-import {ArrowForwardIcon} from '@chakra-ui/icons';
-import * as bs from 'react-icons/bs';
 
 import {NoAuthLayout} from '../../components/noAuth/';
 

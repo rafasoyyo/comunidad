@@ -49,8 +49,8 @@ export default class AuthService {
                 password
             );
             const user = userCredential.user;
-            const userProfile = await this.updateUserName(user, name);
-            const userData = (await this.userService.edit({id: user.uid, email})) as UserData;
+            await this.updateUserName(user, name);
+            (await this.userService.edit({id: user.uid, email})) as UserData;
             const userClass = await this.getUserClass(user);
             result = userClass as UserClass;
         } catch (e: any) {

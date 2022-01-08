@@ -15,7 +15,6 @@ import {
     Text
 } from '@chakra-ui/react';
 import {ArrowForwardIcon} from '@chakra-ui/icons';
-import * as bs from 'react-icons/bs';
 
 import {AuthService} from '../../core/services';
 import {NoAuthLayout} from '../../components/noAuth';

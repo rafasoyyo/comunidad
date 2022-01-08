@@ -1,5 +1,5 @@
 import {AbstractService} from '../services';
-import {User, UserData} from '../interfaces';
+import {UserData} from '../interfaces';
 
 export const identifier = 'users';
 

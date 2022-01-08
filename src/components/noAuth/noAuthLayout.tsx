@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Container, Flex, Spinner, Text} from '@chakra-ui/react';
+import {Box, Container, Flex} from '@chakra-ui/react';
 import {ConfigContext} from '../../core/contexts';
 import {ConfigInterface} from '../../core/interfaces';
 

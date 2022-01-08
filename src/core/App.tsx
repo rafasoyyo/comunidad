@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import '../translations/i18n';
 import {useTranslation} from 'react-i18next';
-import {Button} from '@chakra-ui/react';
 
 import Default from '../temp/defaultTemplate';
 import Test from '../temp/testTemplate';
@@ -23,7 +22,6 @@ const configService = new ConfigService();
  * @returns React.ReactElement
  */
 export default function App() {
-    const {t} = useTranslation();
     const [isOnline, setIsOnline] = useState(true);
     const [config, setConfig] = useState<ConfigInterface>({} as ConfigInterface);
     const [user, setUser] = useState<UserClass>({} as UserClass);
@@ -32,7 +30,6 @@ export default function App() {
         configService
             .get()
             .then(async (c: ConfigInterface) => {
-                // console.log('config', c);
                 setConfig(c);
                 authService
                     .getAuthState()
@@ -40,7 +37,6 @@ export default function App() {
                     .catch(() => setUser({} as UserClass));
             })
             .catch((c) => {
-                // console.error(c);
                 setConfig(c as ConfigInterface);
                 setIsOnline(false);
             });
@@ -118,9 +114,6 @@ const LoggedInRoutes = (props: {user: UserClass; setUser: Function}): React.Reac
                                 element={<Navigate replace to={t('rdefault')} />}
                             ></Route>
                         </Routes>
-                        <React.Fragment>
-                            <Button onClick={singOut}> {t('form.singOut')} </Button>
-                        </React.Fragment>
                     </main>
                 </BrowserRouter>
             )}
