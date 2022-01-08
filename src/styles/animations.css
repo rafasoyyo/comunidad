@@ -1,5 +1,5 @@
 .animated.fadeInFromBottom {
-    animation: fromBottom 750ms cubic-bezier(0, 1, 0.75, 1), fadeIn 750ms cubic-bezier(0.4, 0.4, 0.4, 1);
+    animation: fromBottom 750ms cubic-bezier(0, 1, 0.75, 1), fadeIn 750ms linear;
     animation-delay: 100ms;
     animation-fill-mode: forwards;
     top: 50%;
