@@ -26,7 +26,27 @@ const Pages = {
         name: 'home'
     },
     documents: {
-        name: 'Documents'
+        name: 'Documents',
+        add: 'Add document',
+        modal: {
+            add: 'Add document',
+            edit: 'Edit document',
+            chooseDocsType:
+                'Choose a document type and it will be applied to all documents uploaded'
+        },
+        table: {
+            name: 'Name',
+            type: 'Type',
+            date: 'Date',
+            size: 'Size'
+        },
+        type: {
+            document: 'Document',
+            receipt: 'Receipt',
+            notification: 'Notification',
+            minutes: 'Minutes',
+            invoice: 'Invoice'
+        }
     },
     notifications: {
         name: 'Notifications',

@@ -19,7 +19,7 @@ service firebase.storage {
     }
 
     match /public/{any=**} {
-      allow get;
+      allow read;
     }
 
     match /shared/{any=**} {

@@ -27,7 +27,27 @@ const Pages = {
         name: 'Inicio'
     },
     documents: {
-        name: 'Documentos'
+        name: 'Documentos',
+        add: 'Añadir documento',
+        modal: {
+            add: 'Añadir documento',
+            edit: 'Editar documento',
+            chooseDocsType:
+                'Elija un tipo de documento y se aplicará a todos los documentos que se suban'
+        },
+        table: {
+            name: 'Nombre',
+            type: 'Tipo',
+            date: 'Fecha',
+            size: 'Tamaño'
+        },
+        type: {
+            document: 'Documento',
+            receipt: 'Recibo',
+            notification: 'Notificación',
+            minutes: 'Acta',
+            invoice: 'Factura'
+        }
     },
     notifications: {
         name: 'Notificaciones',

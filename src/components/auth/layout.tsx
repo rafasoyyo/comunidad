@@ -37,7 +37,7 @@ export default function Layout(props: {
                 </GridItem>
 
                 <GridItem
-                    colSpan={{base: 4, md: 1}}
+                    colSpan={{base: 4, md: 3}}
                     h={{md: 'calc(100vh - 91px)'}}
                     pb={{base: '5'}}
                     overflowY={{md: 'auto'}}

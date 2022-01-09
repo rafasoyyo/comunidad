@@ -117,7 +117,7 @@ export default class AuthService {
             auth.onAuthStateChanged((user) => {
                 return user?.uid
                     ? this.getUserClass(user).then(resolve).catch(reject)
-                    : reject(new Error('User not found'));
+                    : reject({error: true, msg: new Error('User not found')});
             });
         });
     };

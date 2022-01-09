@@ -5,9 +5,8 @@ import {useTranslation} from 'react-i18next';
 
 import Default from '../temp/defaultTemplate';
 import Test from '../temp/testTemplate';
-import {Login, NotVerified, Register, Offline, Password} from '../pages';
-import {NoAuthLoader} from '../components/noAuth';
-import {Header} from '../components/auth';
+import {Documents, Login, NotVerified, Offline, Password, Register} from '../pages';
+import {Header, NoAuthLoader} from '../components';
 
 import UserClass from './user/userClass';
 import {ConfigInterface, ErrorInterface} from './interfaces';
@@ -22,45 +21,43 @@ const configService = new ConfigService();
  * @returns React.ReactElement
  */
 export default function App() {
-    const [isOnline, setIsOnline] = useState(true);
     const [config, setConfig] = useState<ConfigInterface>({} as ConfigInterface);
+    const [appReady, setAppReady] = useState(false);
     const [user, setUser] = useState<UserClass>({} as UserClass);
 
     useEffect(() => {
         configService
             .get()
-            .then(async (c: ConfigInterface) => {
-                setConfig(c);
+            .then((config: ConfigInterface) => {
+                setConfig(config as ConfigInterface);
                 authService
                     .getAuthState()
                     .then((userClass) => setUser(userClass as UserClass))
-                    .catch(() => setUser({} as UserClass));
+                    .catch(() => null)
+                    .finally(() => setAppReady(true));
             })
-            .catch((c) => {
-                setConfig(c as ConfigInterface);
-                setIsOnline(false);
+            .catch((config: ConfigInterface) => {
+                setConfig(config as ConfigInterface);
+                setAppReady(true);
             });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-        authService
-            .getAuthState()
-            .then((userClass) => setUser(userClass as UserClass))
-            .catch(() => setUser({} as UserClass));
+        config &&
+            authService
+                .getAuthState()
+                .then((userClass) => setUser(userClass as UserClass))
+                .catch(() => setUser({} as UserClass));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, ['user']);
 
-    return config.app ? (
+    return appReady ? (
         <ConfigContext.Provider value={config}>
-            {isOnline ? (
-                user?.auth ? (
-                    <LoggedInRoutes user={user} setUser={setUser} />
-                ) : (
-                    <LoggedOutRoutes setUser={setUser} />
-                )
+            {user?.auth ? (
+                <LoggedInRoutes user={user} setUser={setUser} />
             ) : (
-                <Offline />
+                <LoggedOutRoutes setUser={setUser} />
             )}
         </ConfigContext.Provider>
     ) : (
@@ -102,7 +99,7 @@ const LoggedInRoutes = (props: {user: UserClass; setUser: Function}): React.Reac
                                 element={<Navigate replace to={t('rhome')} />}
                             ></Route>
                             <Route path={t('rinit')} element={<Test />} />
-                            <Route path={t('rdocuments')} element={<Default />} />
+                            <Route path={t('rdocuments')} element={<Documents />} />
                             <Route path={t('rnotifications')} element={<Test />} />
                             <Route path={t('rspaces')} element={<Default />} />
                             <Route path={t('revents')} element={<Test />} />
@@ -111,7 +108,7 @@ const LoggedInRoutes = (props: {user: UserClass; setUser: Function}): React.Reac
                             <Route path={t('rprofile')} element={<Default />} />
                             <Route
                                 path="*"
-                                element={<Navigate replace to={t('rdefault')} />}
+                                element={<Navigate replace to={t('rdocuments')} />}
                             ></Route>
                         </Routes>
                     </main>

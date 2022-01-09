@@ -1,3 +1,5 @@
 import Header from './header';
+import Layout from './layout';
+import UploadZone from './uploadZone';
 
-export {Header};
+export {Header, Layout, UploadZone};

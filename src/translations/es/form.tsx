@@ -12,7 +12,8 @@ const Forms = {
         singOut: 'Cerrar sesión',
         saveandclose: 'Guardar y cerrar',
         show: 'Mostrar',
-        hide: 'Ocultar'
+        hide: 'Ocultar',
+        select: 'Elija una opcion'
     },
     error: {
         auth_wrong_password: 'Usuario o contraseña incorrectos',

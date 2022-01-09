@@ -12,7 +12,8 @@ const Forms = {
         singOut: 'Sing Out',
         saveandclose: 'Save and close',
         show: 'Show',
-        hide: 'Hide'
+        hide: 'Hide',
+        select: 'Select an option'
     },
     error: {
         auth_wrong_password: 'Invalid user or password',
