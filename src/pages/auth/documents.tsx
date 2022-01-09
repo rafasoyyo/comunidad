@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState, useReducer} from 'react';
 import {useTranslation} from 'react-i18next';
-import {ArrowUpIcon, CloseIcon, DeleteIcon} from '@chakra-ui/icons';
+import {ArrowUpIcon, ArrowDownIcon, CloseIcon, DeleteIcon} from '@chakra-ui/icons';
 import {
     Box,
     Button,
@@ -16,7 +16,11 @@ import {
     Text,
     useDisclosure,
     Select,
-    IconButton
+    IconButton,
+    Tooltip,
+    FormControl,
+    FormLabel,
+    Input
 } from '@chakra-ui/react';
 
 import {
@@ -29,6 +33,7 @@ import {
 import {DocumentService} from '../../core/services';
 import {UserContext} from '../../core/contexts';
 import {Layout, UploadZone} from '../../components';
+import {filters} from '../../helpers';
 
 const documentsReducer = (
     state: DocumentInterface[],
@@ -117,7 +122,7 @@ export default function Documents(props: {}): React.ReactElement {
             lateral={
                 <DocumentPageFilter
                     allDocuments={allDocuments}
-                    // setDisplayDocuments={setDisplayDocuments}
+                    documentsDispatch={documentsDispatch}
                     openModal={openModal}
                 />
             }
@@ -147,7 +152,6 @@ const DocumentPageComponent = (props: {
     openModal: Function;
 }): React.ReactElement => {
     const {t, i18n} = useTranslation();
-    // const [documentsTable, documentsDispatch] = useReducer(documentsReducer, []);
     const documentTypes = props.documentService.getDocumentTypes();
 
     const setDocumetType = async (
@@ -173,8 +177,7 @@ const DocumentPageComponent = (props: {
                     <Th>{t('documents.table.name')}</Th>
                     <Th>{t('documents.table.type')}</Th>
                     <Th>{t('documents.table.date')}</Th>
-                    <Th>{t('download')}</Th>
-                    <Th>{t('delete')}</Th>
+                    <Th>{t('documents.table.actions')}</Th>
                 </Tr>
             </Thead>
             <Tbody>
@@ -215,20 +218,28 @@ const DocumentPageComponent = (props: {
                                     timeStyle: 'short'
                                 }).format(new Date(d.metadata.timeCreated))}
                             </Td>
-                            <Td width="100px">
-                                <Link href={d.url} isExternal color="blue.500">
-                                    <Text casing="capitalize">{t('download')}</Text>
-                                </Link>
-                            </Td>
-                            <Td width="100px" align="center">
-                                <IconButton
-                                    size="sm"
-                                    variant="outline"
-                                    colorScheme="red"
-                                    aria-label="Delete"
-                                    icon={<DeleteIcon />}
-                                    onClick={() => deleteDocumet(d)}
-                                />
+                            <Td width="120px" align="center">
+                                <Tooltip label={t('download')}>
+                                    <Link href={d.url} color="blue.500" isExternal pr="2">
+                                        <IconButton
+                                            size="sm"
+                                            variant="outline"
+                                            colorScheme="blue"
+                                            aria-label="Download"
+                                            icon={<ArrowDownIcon w="5" h="5" />}
+                                        />
+                                    </Link>
+                                </Tooltip>
+                                <Tooltip label={t('delete')}>
+                                    <IconButton
+                                        size="sm"
+                                        variant="outline"
+                                        colorScheme="red"
+                                        aria-label="Delete"
+                                        icon={<DeleteIcon w="5" h="5" />}
+                                        onClick={() => deleteDocumet(d)}
+                                    />
+                                </Tooltip>
                             </Td>
                         </Tr>
                     ))}
@@ -239,16 +250,40 @@ const DocumentPageComponent = (props: {
 
 const DocumentPageFilter = (props: {
     allDocuments: DocumentInterface[];
-    // setDisplayDocuments: Function;
+    documentsDispatch: Function;
     openModal: Function;
 }): React.ReactElement => {
     const {t} = useTranslation();
     const document = {} as StorageReference;
+
+    const typeFilter = (inputValue: string) => {
+        const userListDisplay = props.allDocuments.filter(filters.string, inputValue);
+        props.documentsDispatch({type: 'load', data: userListDisplay});
+    };
+
     return (
         <Box>
-            <Button w="100%" colorScheme="teal" onClick={() => props.openModal(document)}>
-                {t('documents.add')}
-            </Button>
+            <Box>
+                <Button w="100%" colorScheme="teal" onClick={() => props.openModal(document)}>
+                    {t('documents.add')}
+                </Button>
+            </Box>
+            <Box pt="6">
+                <Text fontSize="22" textAlign="center">
+                    {t('filters.filter')}
+                </Text>
+                <FormControl mt="2">
+                    <FormLabel htmlFor="stringFilter" type="text">
+                        {t('filters.typetofilter')}
+                    </FormLabel>
+
+                    <Input
+                        id="stringFilter"
+                        placeholder={t('filters.typetofilter')}
+                        onChange={(e) => typeFilter(e.target.value)}
+                    />
+                </FormControl>
+            </Box>
         </Box>
     );
 };

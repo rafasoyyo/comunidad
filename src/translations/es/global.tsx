@@ -1,7 +1,8 @@
 const Global = {
     welcome: 'Bienvenido a la comunidad ',
     loading: 'Cargando datos...',
-    dowload: 'Descargar'
+    download: 'Descargar',
+    delete: 'Eliminar'
 };
 
 export default Global;

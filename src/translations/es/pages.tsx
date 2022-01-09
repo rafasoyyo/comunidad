@@ -39,7 +39,8 @@ const Pages = {
             name: 'Nombre',
             type: 'Tipo',
             date: 'Fecha',
-            size: 'Tamaño'
+            size: 'Tamaño',
+            actions: 'Acciones'
         },
         type: {
             document: 'Documento',
