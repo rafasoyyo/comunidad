@@ -20,7 +20,12 @@ import {
     Tooltip,
     FormControl,
     FormLabel,
-    Input
+    Input,
+    SimpleGrid,
+    Drawer,
+    DrawerCloseButton,
+    DrawerContent,
+    DrawerOverlay
 } from '@chakra-ui/react';
 
 import {
@@ -33,46 +38,14 @@ import {
 import {DocumentService} from '../../core/services';
 import {UserContext} from '../../core/contexts';
 import {Layout, UploadZone} from '../../components';
-import {filters} from '../../helpers';
-
-const documentsReducer = (
-    state: DocumentInterface[],
-    action: {
-        type: string;
-        data: any;
-    }
-): DocumentInterface[] => {
-    switch (action.type) {
-        case 'load': {
-            return action.data;
-        }
-        case 'add': {
-            state = [...state, ...action.data];
-            return state;
-        }
-        case 'edit': {
-            state = state.map((d) =>
-                d.url === action.data.url ? action.data : d
-            ) as DocumentInterface[];
-            return state;
-        }
-        case 'delete': {
-            state = state.filter((i: DocumentInterface) => i.url !== action.data.url);
-            return state;
-        }
-        default: {
-            return state;
-        }
-    }
-};
+import Reducer from '../../core/reducers';
 
 export default function Documents(props: {}): React.ReactElement {
     const {t} = useTranslation();
     const [isLoading, setLoading] = useState(true);
     const [modalTitle, setModalTitle] = useState('');
-    const [displayDocuments, documentsDispatch] = useReducer(documentsReducer, []);
+    const [displayDocuments, documentsDispatch] = useReducer(Reducer, []);
     const [allDocuments, setAllDocuments] = useState([] as DocumentInterface[]);
-    // const [displayDocuments, setDisplayDocuments] = useState([] as StorageReference[]);
     const [selectedDocument, setSelectedDocument] = useState({} as StorageReference);
     const {isOpen, onOpen, onClose} = useDisclosure();
 
@@ -113,14 +86,14 @@ export default function Documents(props: {}): React.ReactElement {
             isLoading={isLoading}
             main={
                 <DocumentPageComponent
-                    displayDocuments={displayDocuments}
+                    displayDocuments={displayDocuments as DocumentInterface[]}
                     documentsDispatch={documentsDispatch}
                     documentService={documentService}
                     openModal={openModal}
                 />
             }
             lateral={
-                <DocumentPageFilter
+                <DocumentPageLateral
                     allDocuments={allDocuments}
                     documentsDispatch={documentsDispatch}
                     openModal={openModal}
@@ -145,6 +118,10 @@ export default function Documents(props: {}): React.ReactElement {
     );
 }
 
+const SortingArrowIcon = (props: {isUp: boolean}): React.ReactElement => {
+    return props.isUp ? <ArrowUpIcon /> : <ArrowDownIcon />;
+};
+
 const DocumentPageComponent = (props: {
     displayDocuments: DocumentInterface[];
     documentService: DocumentService;
@@ -153,6 +130,8 @@ const DocumentPageComponent = (props: {
 }): React.ReactElement => {
     const {t, i18n} = useTranslation();
     const documentTypes = props.documentService.getDocumentTypes();
+    const [sortingDirection, setSortingDirection] = useState(true);
+    const [sortingAttribute, setSortingAttribute] = useState('');
 
     const setDocumetType = async (
         doc: DocumentInterface,
@@ -162,21 +141,46 @@ const DocumentPageComponent = (props: {
             customMetadata: {type: e.target.value}
         });
         doc.metadata = customMetadata as FullMetadata;
-        props.documentsDispatch({type: 'edit', data: doc});
+        props.documentsDispatch({type: 'edit', data: doc, key: 'url'});
     };
 
     const deleteDocumet = async (doc: DocumentInterface) => {
-        const customMetadata = await props.documentService.deleteFile(doc.ref.fullPath);
-        props.documentsDispatch({type: 'delete', data: doc});
+        await props.documentService.deleteFile(doc.ref.fullPath);
+        props.documentsDispatch({type: 'delete', data: doc, key: 'url'});
+    };
+
+    const sortDocuments = (sortingType: string, sortingAttribute: string) => {
+        props.documentsDispatch({
+            type: sortingType,
+            key: sortingAttribute,
+            direction: sortingDirection
+        });
+        setSortingAttribute(sortingAttribute);
+        setSortingDirection(!sortingDirection);
     };
 
     return (
-        <Table variant="simple">
+        <Table variant="simple" minWidth="800px">
             <Thead>
                 <Tr>
-                    <Th>{t('documents.table.name')}</Th>
-                    <Th>{t('documents.table.type')}</Th>
-                    <Th>{t('documents.table.date')}</Th>
+                    <Th onClick={() => sortDocuments('sortByString', 'name')}>
+                        {t('documents.table.name')}
+                        {sortingAttribute === 'name' && (
+                            <SortingArrowIcon isUp={sortingDirection} />
+                        )}
+                    </Th>
+                    <Th onClick={() => sortDocuments('sortByString', 'type')}>
+                        {t('documents.table.type')}
+                        {sortingAttribute === 'type' && (
+                            <SortingArrowIcon isUp={sortingDirection} />
+                        )}
+                    </Th>
+                    <Th onClick={() => sortDocuments('sortByStringDate', 'createdAt')}>
+                        {t('documents.table.date')}
+                        {sortingAttribute === 'createdAt' && (
+                            <SortingArrowIcon isUp={sortingDirection} />
+                        )}
+                    </Th>
                     <Th>{t('documents.table.actions')}</Th>
                 </Tr>
             </Thead>
@@ -218,7 +222,7 @@ const DocumentPageComponent = (props: {
                                     timeStyle: 'short'
                                 }).format(new Date(d.metadata.timeCreated))}
                             </Td>
-                            <Td width="120px" align="center">
+                            <Td width="150px" align="center">
                                 <Tooltip label={t('download')}>
                                     <Link href={d.url} color="blue.500" isExternal pr="2">
                                         <IconButton
@@ -248,26 +252,64 @@ const DocumentPageComponent = (props: {
     );
 };
 
-const DocumentPageFilter = (props: {
+const DocumentPageLateral = (props: {
     allDocuments: DocumentInterface[];
     documentsDispatch: Function;
     openModal: Function;
 }): React.ReactElement => {
     const {t} = useTranslation();
     const document = {} as StorageReference;
-
-    const typeFilter = (inputValue: string) => {
-        const userListDisplay = props.allDocuments.filter(filters.string, inputValue);
-        props.documentsDispatch({type: 'load', data: userListDisplay});
-    };
+    const {isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose} = useDisclosure();
 
     return (
-        <Box>
-            <Box>
+        <>
+            <SimpleGrid spacing="2" columns={{base: 2, md: 1}} w="100%">
                 <Button w="100%" colorScheme="teal" onClick={() => props.openModal(document)}>
                     {t('documents.add')}
                 </Button>
+                <Button
+                    w="100%"
+                    colorScheme="teal"
+                    display={{base: 'flex', md: 'none'}}
+                    onClick={onDrawerOpen}
+                >
+                    {t('menu')}
+                </Button>
+            </SimpleGrid>
+            <Box display={{base: 'flex', md: 'none'}}>
+                <Drawer isOpen={isDrawerOpen} onClose={onDrawerClose} placement="right">
+                    <DrawerOverlay />
+                    <DrawerContent bg="gray.50" p="5">
+                        <DrawerCloseButton />
+                        <DocumentPageFilter
+                            allDocuments={props.allDocuments}
+                            documentsDispatch={props.documentsDispatch}
+                        />
+                    </DrawerContent>
+                </Drawer>
             </Box>
+            <Box display={{base: 'none', md: 'block'}}>
+                <DocumentPageFilter
+                    allDocuments={props.allDocuments}
+                    documentsDispatch={props.documentsDispatch}
+                />
+            </Box>
+        </>
+    );
+};
+
+const DocumentPageFilter = (props: {
+    allDocuments: DocumentInterface[];
+    documentsDispatch: Function;
+}): React.ReactElement => {
+    const {t} = useTranslation();
+
+    const typeFilter = (inputValue: string) => {
+        props.documentsDispatch({type: 'filterByString', key: inputValue});
+    };
+
+    return (
+        <>
             <Box pt="6">
                 <Text fontSize="22" textAlign="center">
                     {t('filters.filter')}
@@ -284,7 +326,7 @@ const DocumentPageFilter = (props: {
                     />
                 </FormControl>
             </Box>
-        </Box>
+        </>
     );
 };
 

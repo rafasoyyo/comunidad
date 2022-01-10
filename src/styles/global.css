@@ -8,6 +8,21 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.root > header {
+    position: fixed;
+    height: 60px;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.root > main{
+    margin-top: 60px;
+    height: calc(100vh - 61px);
+    overflow: auto;
+}
+
 .headerMobile .active>div:after {
     content: '';
     position: absolute;

@@ -3,6 +3,7 @@ import AddressInterface from './addressInterface';
 import ConfigInterface, {ModuleInterface} from '../config/configInterface';
 import DocumentInterface from '../document/documentInterface';
 import ErrorInterface from './errorInterface';
+import EventInterface from '../event/eventInterface';
 import UserInterface, {UserData} from '../user/userInterface';
 
 import {FullMetadata, SettableMetadata, StorageReference, UploadResult} from 'firebase/storage';
@@ -14,6 +15,7 @@ export type {
     ConfigInterface,
     DocumentInterface,
     ErrorInterface,
+    EventInterface,
     FullMetadata,
     ModuleInterface,
     SettableMetadata,

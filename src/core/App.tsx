@@ -5,7 +5,7 @@ import {useTranslation} from 'react-i18next';
 
 import Default from '../temp/defaultTemplate';
 import Test from '../temp/testTemplate';
-import {Documents, Login, NotVerified, Offline, Password, Register} from '../pages';
+import {Documents, Events, Login, NotVerified, Password, Register} from '../pages';
 import {Header, NoAuthLoader} from '../components';
 
 import UserClass from './user/userClass';
@@ -102,7 +102,7 @@ const LoggedInRoutes = (props: {user: UserClass; setUser: Function}): React.Reac
                             <Route path={t('rdocuments')} element={<Documents />} />
                             <Route path={t('rnotifications')} element={<Test />} />
                             <Route path={t('rspaces')} element={<Default />} />
-                            <Route path={t('revents')} element={<Test />} />
+                            <Route path={t('revents')} element={<Events />} />
                             <Route path={t('rreceipts')} element={<Default />} />
                             <Route path={t('rusers')} element={<Test />} />
                             <Route path={t('rprofile')} element={<Default />} />

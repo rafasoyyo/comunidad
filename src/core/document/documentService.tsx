@@ -44,6 +44,10 @@ export default class DocumentService {
             minutes: {
                 id: 'minutes',
                 color: 'orange.300'
+            },
+            contract: {
+                id: 'contract',
+                color: 'purple.300'
             }
         };
     };
@@ -78,7 +82,17 @@ export default class DocumentService {
                 getDownloadURL(reference),
                 getMetadata(reference)
             ]);
-            return {ref: promises[0], url: promises[1], metadata: promises[2]} as DocumentInterface;
+            return {
+                id: reference.toString(),
+                ref: promises[0],
+                url: promises[1],
+                metadata: promises[2],
+                data: {
+                    name: promises[2].name,
+                    createdAt: promises[2].timeCreated,
+                    ...promises[2].customMetadata
+                }
+            } as DocumentInterface;
         } catch (e: any) {
             console.error(e);
             return {
@@ -125,7 +139,7 @@ export default class DocumentService {
     getInvoices = async (
         userId = this.currentUser.auth.uid
     ): Promise<DocumentInterface[] | ErrorInterface> => {
-        const references = (await this.getUserFiles()) as StorageReference[];
+        const references = (await this.getUserFiles(userId)) as StorageReference[];
         const promises = references.map((item: StorageReference) => this.getFileInfo(item));
         let files = (await Promise.all(promises)) as any;
         files = files.filter((item: any) => item.metadata.customMetadata?.type === 'invoice');
@@ -234,13 +248,9 @@ export default class DocumentService {
         files?: File[],
         fileNames?: string[]
     ): Promise<FullMetadata[] | ErrorInterface> => {
-        // const promises: Promise<SettableMetadata>[] = [];
         const paths: string[] =
             (files?.map((file) => 'public/' + this.getValidName(file.name)) as string[]) ||
             (fileNames?.map((fileName) => 'public/' + this.getValidName(fileName)) as string[]);
-        // paths.forEach(file => {
-        //     promises.push(this.updateFilesInfo(paths, metadata) as Promise<SettableMetadata>);
-        // });
         const results = await this.updateFilesInfo(paths, metadata);
         return results as FullMetadata[];
     };
@@ -251,7 +261,6 @@ export default class DocumentService {
         fileNames?: string[],
         userId = this.currentUser.auth.uid
     ): Promise<FullMetadata[] | ErrorInterface> => {
-        // const promises: Promise<SettableMetadata>[] = [];
         const paths: string[] =
             (files?.map((file) => `users/${userId}/${this.getValidName(file.name)}`) as string[]) ||
             (fileNames?.map(

@@ -7,7 +7,8 @@ import Password from './noAuth/password';
 
 /* AUTH PAGES*/
 import Documents from './auth/documents';
+import Events from './auth/events';
 
 export {Login, NotVerified, Register, Offline, Password};
 
-export {Documents};
+export {Documents, Events};

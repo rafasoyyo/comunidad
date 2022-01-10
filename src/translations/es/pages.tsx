@@ -47,7 +47,8 @@ const Pages = {
             receipt: 'Recibo',
             notification: 'Notificación',
             minutes: 'Acta',
-            invoice: 'Factura'
+            invoice: 'Factura',
+            contract: 'Contrato'
         }
     },
     notifications: {
