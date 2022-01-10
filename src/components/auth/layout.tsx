@@ -19,13 +19,7 @@ export default function Layout(props: {
 }): React.ReactElement {
     return !props.isLoading ? (
         <>
-            <Grid
-                p="15px"
-                pb="0"
-                templateRows="repeat(1, 1fr)"
-                templateColumns="repeat(4, 1fr)"
-                gap="4"
-            >
+            <Grid p="15px" templateRows="repeat(1, 1fr)" templateColumns="repeat(4, 1fr)" gap="4">
                 <GridItem
                     colSpan={{base: 4, md: 1}}
                     h={{md: 'calc(100vh - 91px)'}}
@@ -39,7 +33,6 @@ export default function Layout(props: {
                 <GridItem
                     colSpan={{base: 4, md: 3}}
                     h={{md: 'calc(100vh - 91px)'}}
-                    pb={{base: '5'}}
                     overflowY={{md: 'auto'}}
                 >
                     {props.main}

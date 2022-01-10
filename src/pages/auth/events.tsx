@@ -136,6 +136,7 @@ const EventPageComponent = (props: {
             // eventClick={handleEventClick}
             initialEvents={props.displayEvents}
             events={props.displayEvents}
+            height="100%"
             // eventAdd={handleEventClick}
             // eventChange={handleEventClick}
             // eventRemove={handleEventClick}
@@ -248,8 +249,10 @@ const HandleEventsModal = (props: {
                     <ModalFooter my="6">
                         <Button
                             id="saveandclose"
+                            size="sm"
                             type="submit"
                             colorScheme="teal"
+                            mr="2"
                             isLoading={isSavingAndClosing}
                             rightIcon={<ArrowForwardIcon w={5} h={5} />}
                         >
@@ -257,8 +260,10 @@ const HandleEventsModal = (props: {
                         </Button>
                         <Button
                             id="save"
+                            size="sm"
                             type="button"
                             colorScheme="teal"
+                            mr="2"
                             isLoading={isSaving}
                             onClick={save}
                             rightIcon={<ArrowForwardIcon w={5} h={5} />}
@@ -267,7 +272,7 @@ const HandleEventsModal = (props: {
                         </Button>
                         <Button
                             colorScheme="red"
-                            mx={3}
+                            size="sm"
                             rightIcon={<CloseIcon w={3} h={3} />}
                             onClick={() => props.closeModal()}
                         >

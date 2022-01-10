@@ -83,7 +83,7 @@ export default class DocumentService {
                 getMetadata(reference)
             ]);
             return {
-                id: reference.toString(),
+                uid: reference.toString(),
                 ref: promises[0],
                 url: promises[1],
                 metadata: promises[2],

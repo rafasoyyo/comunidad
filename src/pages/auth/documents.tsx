@@ -39,15 +39,19 @@ import {DocumentService} from '../../core/services';
 import {UserContext} from '../../core/contexts';
 import {Layout, UploadZone} from '../../components';
 import Reducer from '../../core/reducers';
+import {Sorters, Filters, FilterInterface} from '../../helpers';
 
 export default function Documents(props: {}): React.ReactElement {
     const {t} = useTranslation();
     const [isLoading, setLoading] = useState(true);
     const [modalTitle, setModalTitle] = useState('');
-    const [displayDocuments, documentsDispatch] = useReducer(Reducer, []);
-    const [allDocuments, setAllDocuments] = useState([] as DocumentInterface[]);
-    const [selectedDocument, setSelectedDocument] = useState({} as StorageReference);
     const {isOpen, onOpen, onClose} = useDisclosure();
+    const [displayDocuments, documentsDispatch] = useReducer(Reducer, []);
+    const [selectedDocument, setSelectedDocument] = useState({} as StorageReference);
+    const [documentsFilter, setDocumentsFilter] = useState({
+        type: '',
+        parameter: ''
+    });
 
     const userContext = useContext(UserContext);
     const documentService = new DocumentService(userContext);
@@ -56,8 +60,6 @@ export default function Documents(props: {}): React.ReactElement {
         documentService
             .getAllFilesInfo()
             .then((docs: any[] | ErrorInterface) => {
-                console.log({docs});
-                setAllDocuments(docs as DocumentInterface[]);
                 documentsDispatch({type: 'load', data: docs});
                 setLoading(false);
             })
@@ -89,13 +91,13 @@ export default function Documents(props: {}): React.ReactElement {
                     displayDocuments={displayDocuments as DocumentInterface[]}
                     documentsDispatch={documentsDispatch}
                     documentService={documentService}
+                    documentsFilter={documentsFilter}
                     openModal={openModal}
                 />
             }
             lateral={
                 <DocumentPageLateral
-                    allDocuments={allDocuments}
-                    documentsDispatch={documentsDispatch}
+                    setDocumentsFilter={setDocumentsFilter}
                     openModal={openModal}
                 />
             }
@@ -126,12 +128,16 @@ const DocumentPageComponent = (props: {
     displayDocuments: DocumentInterface[];
     documentService: DocumentService;
     documentsDispatch: Function;
+    documentsFilter: FilterInterface;
     openModal: Function;
 }): React.ReactElement => {
     const {t, i18n} = useTranslation();
     const documentTypes = props.documentService.getDocumentTypes();
-    const [sortingDirection, setSortingDirection] = useState(true);
-    const [sortingAttribute, setSortingAttribute] = useState('');
+    const [sorting, setSorting] = useState({
+        direction: true,
+        attribute: '',
+        function: ''
+    });
 
     const setDocumetType = async (
         doc: DocumentInterface,
@@ -150,111 +156,136 @@ const DocumentPageComponent = (props: {
     };
 
     const sortDocuments = (sortingType: string, sortingAttribute: string) => {
-        props.documentsDispatch({
-            type: sortingType,
-            key: sortingAttribute,
-            direction: sortingDirection
+        setSorting({
+            direction: !sorting.direction,
+            attribute: sortingAttribute,
+            function: sortingType
         });
-        setSortingAttribute(sortingAttribute);
-        setSortingDirection(!sortingDirection);
     };
 
     return (
-        <Table variant="simple" minWidth="800px">
-            <Thead>
-                <Tr>
-                    <Th onClick={() => sortDocuments('sortByString', 'name')}>
-                        {t('documents.table.name')}
-                        {sortingAttribute === 'name' && (
-                            <SortingArrowIcon isUp={sortingDirection} />
-                        )}
-                    </Th>
-                    <Th onClick={() => sortDocuments('sortByString', 'type')}>
-                        {t('documents.table.type')}
-                        {sortingAttribute === 'type' && (
-                            <SortingArrowIcon isUp={sortingDirection} />
-                        )}
-                    </Th>
-                    <Th onClick={() => sortDocuments('sortByStringDate', 'createdAt')}>
-                        {t('documents.table.date')}
-                        {sortingAttribute === 'createdAt' && (
-                            <SortingArrowIcon isUp={sortingDirection} />
-                        )}
-                    </Th>
-                    <Th>{t('documents.table.actions')}</Th>
-                </Tr>
-            </Thead>
-            <Tbody>
-                {props.displayDocuments.length > 0 &&
-                    props.displayDocuments.map((d: any) => (
-                        <Tr key={d.url}>
-                            <Td maxWidth="250px" isTruncated>
-                                {d.metadata.name}
-                            </Td>
-                            <Td width="200px">
-                                {/* {d.metadata.customMetadata?.type} */}
-                                <Select
-                                    placeholder={t('form.select')}
-                                    bg={props.documentService.getTagColor(
-                                        d.metadata.customMetadata?.type
-                                    )}
-                                    borderColor={
-                                        d.metadata.customMetadata?.type ? 'white' : 'black'
-                                    }
-                                    color={d.metadata.customMetadata?.type ? 'white' : 'black'}
-                                    onChange={(e) => setDocumetType(d, e)}
-                                    value={d.metadata.customMetadata?.type}
-                                >
-                                    {Object.keys(documentTypes).map((docKey: string) => (
-                                        <option
-                                            key={documentTypes[docKey].id}
-                                            value={documentTypes[docKey].id}
+        <Box maxWidth="100vw" overflow="auto">
+            <Table variant="simple" minWidth="800px">
+                <Thead>
+                    <Tr>
+                        <Th cursor="pointer" onClick={() => sortDocuments('sortByString', 'name')}>
+                            {t('documents.table.name')}
+                            {sorting.attribute === 'name' && (
+                                <SortingArrowIcon isUp={sorting.direction} />
+                            )}
+                        </Th>
+                        <Th cursor="pointer" onClick={() => sortDocuments('sortByString', 'type')}>
+                            {t('documents.table.type')}
+                            {sorting.attribute === 'type' && (
+                                <SortingArrowIcon isUp={sorting.direction} />
+                            )}
+                        </Th>
+                        <Th
+                            cursor="pointer"
+                            onClick={() => sortDocuments('sortByStringDate', 'createdAt')}
+                        >
+                            {t('documents.table.date')}
+                            {sorting.attribute === 'createdAt' && (
+                                <SortingArrowIcon isUp={sorting.direction} />
+                            )}
+                        </Th>
+                        <Th>{t('documents.table.actions')}</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {props.displayDocuments.length > 0 &&
+                        props.displayDocuments
+                            .filter((i) => {
+                                return props.documentsFilter.type
+                                    ? (Filters as Record<string, any>)[props.documentsFilter.type](
+                                          i,
+                                          props.documentsFilter.parameter
+                                      )
+                                    : true;
+                            })
+                            .sort((a: DocumentInterface, b: DocumentInterface): number => {
+                                const sorted = sorting.function
+                                    ? (Sorters as Record<string, any>)[sorting.function](
+                                          a,
+                                          b,
+                                          sorting.attribute
+                                      )
+                                    : 1;
+                                return sorting.direction ? sorted : -sorted;
+                            })
+                            .map((d: any) => (
+                                <Tr key={d.url}>
+                                    <Td maxWidth="250px" isTruncated>
+                                        {d.metadata.name}
+                                    </Td>
+                                    <Td width="200px">
+                                        {/* {d.metadata.customMetadata?.type} */}
+                                        <Select
+                                            placeholder={t('form.select')}
+                                            bg={props.documentService.getTagColor(
+                                                d.metadata.customMetadata?.type
+                                            )}
+                                            borderColor={
+                                                d.metadata.customMetadata?.type ? 'white' : 'black'
+                                            }
+                                            color={
+                                                d.metadata.customMetadata?.type ? 'white' : 'black'
+                                            }
+                                            onChange={(e) => setDocumetType(d, e)}
+                                            value={d.metadata.customMetadata?.type}
                                         >
-                                            {t(`documents.type.${documentTypes[docKey].id}`)}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </Td>
-                            <Td width="200px">
-                                {/* {d.metadata.timeCreated}{' '} */}
-                                {Intl.DateTimeFormat(i18n.language, {
-                                    dateStyle: 'medium',
-                                    timeStyle: 'short'
-                                }).format(new Date(d.metadata.timeCreated))}
-                            </Td>
-                            <Td width="150px" align="center">
-                                <Tooltip label={t('download')}>
-                                    <Link href={d.url} color="blue.500" isExternal pr="2">
-                                        <IconButton
-                                            size="sm"
-                                            variant="outline"
-                                            colorScheme="blue"
-                                            aria-label="Download"
-                                            icon={<ArrowDownIcon w="5" h="5" />}
-                                        />
-                                    </Link>
-                                </Tooltip>
-                                <Tooltip label={t('delete')}>
-                                    <IconButton
-                                        size="sm"
-                                        variant="outline"
-                                        colorScheme="red"
-                                        aria-label="Delete"
-                                        icon={<DeleteIcon w="5" h="5" />}
-                                        onClick={() => deleteDocumet(d)}
-                                    />
-                                </Tooltip>
-                            </Td>
-                        </Tr>
-                    ))}
-            </Tbody>
-        </Table>
+                                            {Object.keys(documentTypes).map((docKey: string) => (
+                                                <option
+                                                    key={documentTypes[docKey].id}
+                                                    value={documentTypes[docKey].id}
+                                                >
+                                                    {t(
+                                                        `documents.type.${documentTypes[docKey].id}`
+                                                    )}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </Td>
+                                    <Td width="200px">
+                                        {/* {d.metadata.timeCreated}{' '} */}
+                                        {Intl.DateTimeFormat(i18n.language, {
+                                            dateStyle: 'medium',
+                                            timeStyle: 'short'
+                                        }).format(new Date(d.metadata.timeCreated))}
+                                    </Td>
+                                    <Td width="150px" align="center">
+                                        <Tooltip label={t('download')}>
+                                            <Link href={d.url} color="blue.500" isExternal pr="2">
+                                                <IconButton
+                                                    size="sm"
+                                                    variant="outline"
+                                                    colorScheme="blue"
+                                                    aria-label="Download"
+                                                    icon={<ArrowDownIcon w="5" h="5" />}
+                                                />
+                                            </Link>
+                                        </Tooltip>
+                                        <Tooltip label={t('delete')}>
+                                            <IconButton
+                                                size="sm"
+                                                variant="outline"
+                                                colorScheme="red"
+                                                aria-label="Delete"
+                                                icon={<DeleteIcon w="5" h="5" />}
+                                                onClick={() => deleteDocumet(d)}
+                                            />
+                                        </Tooltip>
+                                    </Td>
+                                </Tr>
+                            ))}
+                </Tbody>
+            </Table>
+        </Box>
     );
 };
 
 const DocumentPageLateral = (props: {
-    allDocuments: DocumentInterface[];
-    documentsDispatch: Function;
+    setDocumentsFilter: Function;
     openModal: Function;
 }): React.ReactElement => {
     const {t} = useTranslation();
@@ -281,31 +312,25 @@ const DocumentPageLateral = (props: {
                     <DrawerOverlay />
                     <DrawerContent bg="gray.50" p="5">
                         <DrawerCloseButton />
-                        <DocumentPageFilter
-                            allDocuments={props.allDocuments}
-                            documentsDispatch={props.documentsDispatch}
-                        />
+                        <DocumentPageFilter setDocumentsFilter={props.setDocumentsFilter} />
                     </DrawerContent>
                 </Drawer>
             </Box>
             <Box display={{base: 'none', md: 'block'}}>
                 <DocumentPageFilter
-                    allDocuments={props.allDocuments}
-                    documentsDispatch={props.documentsDispatch}
+                    // allDocuments={props.allDocuments}
+                    setDocumentsFilter={props.setDocumentsFilter}
                 />
             </Box>
         </>
     );
 };
 
-const DocumentPageFilter = (props: {
-    allDocuments: DocumentInterface[];
-    documentsDispatch: Function;
-}): React.ReactElement => {
+const DocumentPageFilter = (props: {setDocumentsFilter: Function}): React.ReactElement => {
     const {t} = useTranslation();
 
     const typeFilter = (inputValue: string) => {
-        props.documentsDispatch({type: 'filterByString', key: inputValue});
+        props.setDocumentsFilter({type: 'filterByString', parameter: inputValue});
     };
 
     return (
@@ -346,9 +371,8 @@ const HandleDocumentModal = (props: {
     const uploadFiles = async () => {
         setUploading(true);
         const uploads = await props.documentService.uploadUserFiles(documents);
-        let metadata;
         if (documentsType && documentsType.length) {
-            metadata = await props.documentService.updateUserFilesInfo(
+            await props.documentService.updateUserFilesInfo(
                 {customMetadata: {type: documentsType}},
                 documents
             );
@@ -389,6 +413,7 @@ const HandleDocumentModal = (props: {
             <ModalFooter my="6">
                 {documents.length > 0 && (
                     <Button
+                        size="sm"
                         colorScheme="teal"
                         mx={3}
                         rightIcon={<ArrowUpIcon w={4} h={4} />}
@@ -398,6 +423,7 @@ const HandleDocumentModal = (props: {
                     </Button>
                 )}
                 <Button
+                    size="sm"
                     colorScheme="red"
                     mx={3}
                     rightIcon={<CloseIcon w={3} h={3} />}
