@@ -11,6 +11,7 @@ const ModalSaleFooter = <I extends AbstractInterface>(props: {
     item: I;
     service: AbstractService<I>;
     onSubmit: Ref<unknown> | undefined;
+    dispatch: Function;
     isValid: Function;
     closeModal: Function;
 }): React.ReactElement => {
@@ -18,6 +19,8 @@ const ModalSaleFooter = <I extends AbstractInterface>(props: {
     const [isSaving, setSaving] = useState(false);
     const [isSavingAndClosing, setSavingAndClosing] = useState(false);
     const [isDeleting, setDeleting] = useState(false);
+
+    const type = props.item.id ? 'edit' : 'add';
 
     useImperativeHandle(props.onSubmit, () => ({
         triggerSubmit(e: any) {
@@ -30,15 +33,17 @@ const ModalSaleFooter = <I extends AbstractInterface>(props: {
             setSaving(true);
             await props.service.edit(props.item);
             setSaving(false);
+            props.dispatch({type: type, data: props.item});
         }
     };
 
     const saveAndClose = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         if (props.isValid()) {
-            e.preventDefault();
             setSavingAndClosing(true);
             await props.service.edit(props.item);
             setSavingAndClosing(true);
+            props.dispatch({type: type, data: props.item});
             props.closeModal();
         }
     };
@@ -47,6 +52,7 @@ const ModalSaleFooter = <I extends AbstractInterface>(props: {
         setDeleting(true);
         await props.service.delete(props.item.id);
         setDeleting(false);
+        props.dispatch({type: 'delete', data: props.item});
         props.closeModal();
     };
 

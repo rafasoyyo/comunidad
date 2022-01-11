@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useEffect, useReducer, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import DatePicker, {registerLocale, setDefaultLocale} from 'react-datepicker';
+import DatePicker, {registerLocale} from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import es from 'date-fns/locale/es';
 
@@ -28,33 +28,18 @@ import {
     FormLabel,
     HStack,
     Icon,
-    IconButton,
     Input,
     ModalBody,
-    ModalFooter,
-    Popover,
-    PopoverTrigger,
     Radio,
     RadioGroup,
     Stack,
-    StackDivider,
     Text,
     Textarea,
     Tooltip,
     useDisclosure,
-    useRadio,
-    useRadioGroup,
     VStack
 } from '@chakra-ui/react';
-import {
-    ArrowForwardIcon,
-    ChevronDownIcon,
-    ChevronUpIcon,
-    CloseIcon,
-    DeleteIcon,
-    EditIcon,
-    SearchIcon
-} from '@chakra-ui/icons';
+import {ChevronDownIcon, ChevronUpIcon, EditIcon, SearchIcon} from '@chakra-ui/icons';
 
 import {Layout, ModalSaleFooter} from '../../components/';
 import {EventService} from '../../core/services';
@@ -62,12 +47,13 @@ import {UserContext} from '../../core/contexts';
 import {EventInterface} from '../../core/interfaces';
 import Reducer from '../../core/reducers';
 
-const now = new Date();
-const nextYear = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000);
 registerLocale('es', es);
 
+const now = new Date();
+const nextYear = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000);
+const halfHour = 30 * 60 * 1000;
+
 function Events(): React.ReactElement {
-    const {t} = useTranslation();
     const [isLoading, setLoading] = useState(false);
     const {isOpen, onOpen, onClose} = useDisclosure();
     const [calendarApi, setCalendarApi] = useState<any>();
@@ -93,13 +79,13 @@ function Events(): React.ReactElement {
 
     const openModal = (json: EventInterface, title: string) => {
         setModalTitle(title);
-        console.log({json});
+        // console.log({json});
         setSelectedEvent(json);
         onOpen();
     };
 
     const closeModal = (): void => {
-        getEventsList();
+        // getEventsList();
         onClose();
     };
 
@@ -163,28 +149,9 @@ const EventPageComponent = (props: {
         isLoaded && props.setCalendarApi(calendarRef.current?.getApi());
     }, []);
 
-    const handleSelect = (selectInfo: DateSelectArg) => {
-        if (selectInfo.view.type === 'dayGridMonth') {
-            selectInfo.view.calendar.changeView('timeGridDay');
-            selectInfo.view.calendar.gotoDate(selectInfo.start);
-        } else {
-            const start = selectInfo.start;
-            const end = new Date(start.getTime() + 30 * 60 * 1000);
-            props.openModal(
-                {start: start.toISOString(), end: end.toISOString()},
-                t('events.modal.edit')
-            );
-        }
-    };
-
-    const handleClick = (clickInfo: EventClickArg) => {
-        const info = clickInfo.event.toJSON();
-        props.openModal({...info, ...info.extendedProps}, t('events.modal.edit'));
-    };
-
-    const handleChange = async (changeInfo: EventChangeArg) => {
-        const data = changeInfo.event.toJSON();
-        const info = {
+    const getEventData = (info: any) => {
+        const data = info.event.toJSON();
+        return {
             createdAt: data.extendedProps.createdAt,
             type: data.extendedProps.type,
             color: data.backgroundColor,
@@ -193,8 +160,32 @@ const EventPageComponent = (props: {
             start: data.start,
             title: data.title
         };
-        await props.eventService.edit(info as EventInterface);
-        props.eventDispatch({type: 'edit', data: info});
+    };
+
+    const handleClick = (clickInfo: EventClickArg) => {
+        const data = getEventData(clickInfo);
+        props.openModal(data, t('events.modal.edit'));
+    };
+
+    const handleChange = async (changeInfo: EventChangeArg) => {
+        const data = getEventData(changeInfo);
+        await props.eventService.edit(data as EventInterface);
+        props.eventDispatch({type: 'edit', data: data});
+    };
+
+    const handleSelect = (selectInfo: DateSelectArg) => {
+        // console.log({selectInfo});
+        if (selectInfo.view.type === 'dayGridMonth') {
+            selectInfo.view.calendar.changeView('timeGridDay');
+            selectInfo.view.calendar.gotoDate(selectInfo.start);
+        } else {
+            const start = selectInfo.start;
+            const end = new Date(selectInfo.end || start.getTime() + halfHour);
+            props.openModal(
+                {start: start.toISOString(), end: end.toISOString()},
+                t('events.modal.add')
+            );
+        }
     };
 
     return (
@@ -213,7 +204,7 @@ const EventPageComponent = (props: {
             select={handleSelect}
             eventClick={handleClick}
             events={props.displayEvents.map((ev) => {
-                console.log();
+                // console.log(ev);
                 return {
                     backgroundColor: ev.color,
                     borderColor: ev.color,
@@ -240,7 +231,7 @@ const EventList = (props: {
     const {t, i18n} = useTranslation();
     const [event, setEvent] = useState({
         start: now.toISOString(),
-        end: new Date(now.getTime() + 30 * 60 * 1000).toISOString()
+        end: new Date(now.getTime() + halfHour).toISOString()
     } as EventInterface);
     // console.log(props.calendarApi);
 
@@ -403,7 +394,7 @@ const HandleEventsModal = (props: {
                 end: !event.end
             });
         }
-        console.log(isValid, !!isValid, errors);
+        // console.log(isValid, !!isValid, errors);
         return !!isValid;
     };
 
@@ -416,10 +407,10 @@ const HandleEventsModal = (props: {
 
     useEffect(() => {
         const start = new Date(event.start);
-        if (event.end && new Date(event.end) < start) {
+        if (!event.end || new Date(event.end) < start) {
             setEvent({
                 ...event,
-                end: new Date(start.getTime() + 30 * 60 * 1000).toISOString()
+                end: new Date(start.getTime() + halfHour).toISOString()
             });
         }
     }, [event.start, event.end]);
@@ -492,8 +483,8 @@ const HandleEventsModal = (props: {
                             todayButton={t('form.today', 'today')}
                             showTimeSelect
                             dateFormat="Pp"
-                            minTime={new Date(event.start)}
-                            maxTime={new Date(nextYear.setHours(0, 0, 0, 0))}
+                            minTime={new Date(new Date(event.start).getTime() + halfHour)}
+                            maxTime={new Date(nextYear.setHours(23, 59, 59, 0))}
                             minDate={new Date(event.start)}
                             maxDate={nextYear}
                         />
@@ -512,7 +503,7 @@ const HandleEventsModal = (props: {
                                 color: props.eventService.getTagColor(e)
                             });
                         }}
-                        defaultValue={event.type || 'meetings'}
+                        value={event.type}
                     >
                         <Stack direction="column">
                             {Object.keys(eventTypes).map((ekey) => (
@@ -529,6 +520,7 @@ const HandleEventsModal = (props: {
             <ModalSaleFooter
                 item={event}
                 service={props.eventService}
+                dispatch={props.eventDispatch}
                 onSubmit={footerRef}
                 isValid={validate}
                 closeModal={props.closeModal}

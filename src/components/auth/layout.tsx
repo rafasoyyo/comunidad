@@ -6,7 +6,8 @@ import {
     ModalCloseButton,
     ModalContent,
     ModalHeader,
-    ModalOverlay
+    ModalOverlay,
+    Text
 } from '@chakra-ui/react';
 import Loading from './loading';
 
@@ -46,7 +47,11 @@ export default function Layout(props: {
                 >
                     <ModalOverlay />
                     <ModalContent>
-                        <ModalHeader>{props.modalProps.title}</ModalHeader>
+                        <ModalHeader align="center">
+                            <Text fontSize="30px" color="gray.600">
+                                {props.modalProps.title}
+                            </Text>
+                        </ModalHeader>
                         <ModalCloseButton />
                         {props.modal}
                     </ModalContent>

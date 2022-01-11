@@ -28,7 +28,7 @@ export default class EventService extends AbstractService<EventInterface> {
             },
             more: {
                 id: 'more',
-                color: '#ED8936' //oramge.400
+                color: '#ED8936' //orange.400
             }
         };
     };

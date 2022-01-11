@@ -14,7 +14,7 @@ const Reducer = <S extends ReducerInterface>(state: S[], action: ActionInterface
             return data;
         },
         add: (state: S[], action: ActionInterface) => {
-            state = [...state, ...data];
+            state = [...state, data];
             return state;
         },
         edit: (state: S[], action: ActionInterface) => {
