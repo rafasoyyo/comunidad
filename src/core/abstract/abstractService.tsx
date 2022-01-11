@@ -1,12 +1,15 @@
 import {store} from '../../firebaseSetup';
 import {collection, getDoc, getDocs, doc, setDoc, deleteDoc, Timestamp} from 'firebase/firestore';
-import {AbstractInterface, ErrorInterface} from '../interfaces';
+import {AbstractInterface, ErrorInterface, UserInterface} from '../interfaces';
 
 export default class AbstractService<S extends AbstractInterface> {
     private collectionId: string;
 
-    constructor(collectionId: string) {
+    private currentUser?: UserInterface;
+
+    constructor(collectionId: string, currentUser?: UserInterface) {
         this.collectionId = collectionId;
+        this.currentUser = currentUser;
     }
 
     /**

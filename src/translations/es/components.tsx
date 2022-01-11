@@ -2,9 +2,11 @@ const Components = {
     header: {
         profile: 'Perfil'
     },
-    filters: {
+    lateral: {
         filter: 'Filtros',
-        typetofilter: 'Escriba para filtrar'
+        typetofilter: 'Escriba para filtrar',
+        sort: 'Ordenar',
+        list: 'Lista'
     },
     sorts: {
         sort: 'Ordenar',
@@ -23,7 +25,7 @@ const Components = {
         drag_drop: 'Arrastra y suelta algunos archivos aquí, o haz clic para seleccionar archivos'
     },
     table: {
-        scroll: 'Desplázate para ver más filas'
+        scroll: 'Desplázate para ver más'
     }
 };
 

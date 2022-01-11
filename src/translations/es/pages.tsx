@@ -59,7 +59,20 @@ const Pages = {
         name: 'Espacios'
     },
     events: {
-        name: 'Eventos'
+        name: 'Eventos',
+        startDate: 'Fecha de inicio',
+        endDate: 'Feha de fin',
+        modal: {
+            add: 'Añadir evento',
+            edit: 'Editar evento',
+            chooseType: '¿De qué tipo evento se trata?'
+        },
+        type: {
+            meetings: 'Reunión',
+            birthday: 'Cumpleaños',
+            maintenance: 'Mantenimiento',
+            more: 'Otros'
+        }
     },
     receipts: {
         name: 'Recibos'

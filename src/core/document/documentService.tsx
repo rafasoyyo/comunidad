@@ -48,6 +48,10 @@ export default class DocumentService {
             contract: {
                 id: 'contract',
                 color: 'purple.300'
+            },
+            notDefined: {
+                id: 'notDefined',
+                color: ''
             }
         };
     };
@@ -83,15 +87,10 @@ export default class DocumentService {
                 getMetadata(reference)
             ]);
             return {
-                uid: reference.toString(),
+                id: reference.toString(),
                 ref: promises[0],
                 url: promises[1],
-                metadata: promises[2],
-                data: {
-                    name: promises[2].name,
-                    createdAt: promises[2].timeCreated,
-                    ...promises[2].customMetadata
-                }
+                metadata: promises[2]
             } as DocumentInterface;
         } catch (e: any) {
             console.error(e);

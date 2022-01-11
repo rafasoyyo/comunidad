@@ -25,7 +25,9 @@ import {
     Drawer,
     DrawerCloseButton,
     DrawerContent,
-    DrawerOverlay
+    DrawerOverlay,
+    InputRightElement,
+    InputGroup
 } from '@chakra-ui/react';
 
 import {
@@ -196,9 +198,16 @@ const DocumentPageComponent = (props: {
                     {props.displayDocuments.length > 0 &&
                         props.displayDocuments
                             .filter((i) => {
+                                const docKey = i.metadata.customMetadata?.type || 'notDefined';
                                 return props.documentsFilter.type
                                     ? (Filters as Record<string, any>)[props.documentsFilter.type](
-                                          i,
+                                          {
+                                              ...i.metadata,
+                                              ...i.metadata.customMetadata,
+                                              locale: t(
+                                                  `documents.type.${documentTypes[docKey].id}`
+                                              )
+                                          },
                                           props.documentsFilter.parameter
                                       )
                                     : true;
@@ -206,8 +215,8 @@ const DocumentPageComponent = (props: {
                             .sort((a: DocumentInterface, b: DocumentInterface): number => {
                                 const sorted = sorting.function
                                     ? (Sorters as Record<string, any>)[sorting.function](
-                                          a,
-                                          b,
+                                          {...a.metadata, ...a.metadata.customMetadata},
+                                          {...b.metadata, ...b.metadata.customMetadata},
                                           sorting.attribute
                                       )
                                     : 1;
@@ -328,8 +337,15 @@ const DocumentPageLateral = (props: {
 
 const DocumentPageFilter = (props: {setDocumentsFilter: Function}): React.ReactElement => {
     const {t} = useTranslation();
+    const [filterValue, setFilterValue] = useState('');
+
+    const cleanTypeFilter = () => {
+        setFilterValue('');
+        props.setDocumentsFilter({type: '', parameter: ''});
+    };
 
     const typeFilter = (inputValue: string) => {
+        setFilterValue(inputValue);
         props.setDocumentsFilter({type: 'filterByString', parameter: inputValue});
     };
 
@@ -337,18 +353,26 @@ const DocumentPageFilter = (props: {setDocumentsFilter: Function}): React.ReactE
         <>
             <Box pt="6">
                 <Text fontSize="22" textAlign="center">
-                    {t('filters.filter')}
+                    {t('lateral.filter')}
                 </Text>
                 <FormControl mt="2">
                     <FormLabel htmlFor="stringFilter" type="text">
-                        {t('filters.typetofilter')}
+                        {t('lateral.typetofilter')}
                     </FormLabel>
 
-                    <Input
-                        id="stringFilter"
-                        placeholder={t('filters.typetofilter')}
-                        onChange={(e) => typeFilter(e.target.value)}
-                    />
+                    <InputGroup>
+                        <Input
+                            id="stringFilter"
+                            placeholder={t('lateral.typetofilter')}
+                            value={filterValue}
+                            onChange={(e) => typeFilter(e.target.value)}
+                        />
+                        <InputRightElement
+                            cursor="pointer"
+                            onClick={cleanTypeFilter}
+                            children={<CloseIcon color="gray.100" />}
+                        />
+                    </InputGroup>
                 </FormControl>
             </Box>
         </>
@@ -415,7 +439,7 @@ const HandleDocumentModal = (props: {
                     <Button
                         size="sm"
                         colorScheme="teal"
-                        mx={3}
+                        mr={2}
                         rightIcon={<ArrowUpIcon w={4} h={4} />}
                         onClick={uploadFiles}
                     >
@@ -425,7 +449,6 @@ const HandleDocumentModal = (props: {
                 <Button
                     size="sm"
                     colorScheme="red"
-                    mx={3}
                     rightIcon={<CloseIcon w={3} h={3} />}
                     onClick={() => props.closeModal()}
                 >

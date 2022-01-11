@@ -1,75 +1,100 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useReducer, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import FullCalendar, {EventClickArg, EventDef, DateSelectArg} from '@fullcalendar/react'; // must go before plugins
-import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin!
+
+import DatePicker, {registerLocale, setDefaultLocale} from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import es from 'date-fns/locale/es';
+
+import FullCalendar, {EventClickArg, DateSelectArg, EventChangeArg} from '@fullcalendar/react';
+import esLocale from '@fullcalendar/core/locales/es';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import listPlugin from '@fullcalendar/list';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 import {
-    Avatar,
+    Accordion,
+    AccordionButton,
+    AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
     Box,
     Button,
+    Center,
     Circle,
+    Divider,
     FormControl,
     FormErrorMessage,
     FormLabel,
     HStack,
-    Modal,
+    Icon,
+    IconButton,
+    Input,
     ModalBody,
-    ModalCloseButton,
-    ModalContent,
     ModalFooter,
-    ModalHeader,
-    ModalOverlay,
+    Popover,
+    PopoverTrigger,
     Radio,
     RadioGroup,
     Stack,
     StackDivider,
     Text,
     Textarea,
+    Tooltip,
     useDisclosure,
     useRadio,
     useRadioGroup,
     VStack
 } from '@chakra-ui/react';
-import {ArrowForwardIcon, CloseIcon} from '@chakra-ui/icons';
+import {
+    ArrowForwardIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    CloseIcon,
+    DeleteIcon,
+    EditIcon,
+    SearchIcon
+} from '@chakra-ui/icons';
 
-import {Layout} from '../../components/';
-
+import {Layout, ModalSaleFooter} from '../../components/';
 import {EventService} from '../../core/services';
+import {UserContext} from '../../core/contexts';
 import {EventInterface} from '../../core/interfaces';
+import Reducer from '../../core/reducers';
 
-const todayStr = new Date().toISOString().replace(/T.*$/, ''); // YYYY-MM-DD of today
-
-const eventService = new EventService();
+const now = new Date();
+const nextYear = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000);
+registerLocale('es', es);
 
 function Events(): React.ReactElement {
     const {t} = useTranslation();
     const [isLoading, setLoading] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [allEvents, setAllEvents] = useState([] as EventInterface[]);
-    const [displayEvents, setDisplayEvents] = useState([] as EventInterface[]);
-    const [selectedEvent, setSelectedEvent] = useState({} as EventInterface);
-    const [calendarEvent, setCalendarEvent] = useState({} as DateSelectArg);
     const {isOpen, onOpen, onClose} = useDisclosure();
+    const [calendarApi, setCalendarApi] = useState<any>();
+    const [modalTitle, setModalTitle] = useState('');
+    const [displayEvents, documentsDispatch] = useReducer(Reducer, []);
+    const [selectedEvent, setSelectedEvent] = useState({} as EventInterface);
+
+    const userContext = useContext(UserContext);
+    const eventService = new EventService(userContext);
 
     const getEventsList = () => {
         eventService
             .getAll()
-            .then((response: EventInterface[]) => {
-                console.log({response});
-                setAllEvents(response);
-                setDisplayEvents(response);
+            .then((eventList: EventInterface[]) => {
+                console.log({eventList});
+                documentsDispatch({type: 'load', data: eventList});
                 setLoading(false);
             })
             .catch((e) => {
-                console.log(e);
                 setLoading(false);
             });
     };
 
-    const openModal = () => {
-        setLoading(false);
+    const openModal = (json: EventInterface, title: string) => {
+        setModalTitle(title);
+        console.log({json});
+        setSelectedEvent(json);
         onOpen();
     };
 
@@ -84,24 +109,33 @@ function Events(): React.ReactElement {
         <Layout
             isLoading={isLoading}
             main={
-                <EventPageComponent
-                    displayEvents={displayEvents}
-                    setCalendarEvent={setCalendarEvent}
-                    openModal={openModal}
-                />
+                isLoading ? (
+                    <></>
+                ) : (
+                    <EventPageComponent
+                        setCalendarApi={setCalendarApi}
+                        displayEvents={displayEvents as EventInterface[]}
+                        eventDispatch={documentsDispatch}
+                        eventService={eventService}
+                        openModal={openModal}
+                    />
+                )
             }
             lateral={
                 <EventList
-                    displayEvents={displayEvents}
-                    setDisplayEvents={setDisplayEvents}
+                    calendarApi={calendarApi}
+                    displayEvents={displayEvents as EventInterface[]}
+                    eventDispatch={documentsDispatch}
+                    eventService={eventService}
                     openModal={openModal}
                 />
             }
             modal={
                 <HandleEventsModal
+                    selectedEvent={selectedEvent}
+                    eventDispatch={documentsDispatch}
+                    eventService={eventService}
                     isOpen={isOpen}
-                    calendarEvent={calendarEvent}
-                    eventData={selectedEvent}
                     closeModal={closeModal}
                 />
             }
@@ -116,220 +150,390 @@ function Events(): React.ReactElement {
 }
 
 const EventPageComponent = (props: {
-    openModal: Function;
+    setCalendarApi: Function;
     displayEvents: EventInterface[];
-    setCalendarEvent: Function;
+    eventDispatch: Function;
+    eventService: EventService;
+    openModal: Function;
 }): React.ReactElement => {
-    const handleEventClick = (info: DateSelectArg) => {
-        console.log(info);
-        props.setCalendarEvent(info);
-        props.openModal(info);
+    const {t, i18n} = useTranslation();
+    const calendarRef = useRef<FullCalendar>(null);
+
+    const calendarLoaded = useCallback((isLoaded: boolean) => {
+        isLoaded && props.setCalendarApi(calendarRef.current?.getApi());
+    }, []);
+
+    const handleSelect = (selectInfo: DateSelectArg) => {
+        if (selectInfo.view.type === 'dayGridMonth') {
+            selectInfo.view.calendar.changeView('timeGridDay');
+            selectInfo.view.calendar.gotoDate(selectInfo.start);
+        } else {
+            const start = selectInfo.start;
+            const end = new Date(start.getTime() + 30 * 60 * 1000);
+            props.openModal(
+                {start: start.toISOString(), end: end.toISOString()},
+                t('events.modal.edit')
+            );
+        }
     };
-    // console.log('displayEvents: ', props.displayEvents);
+
+    const handleClick = (clickInfo: EventClickArg) => {
+        const info = clickInfo.event.toJSON();
+        props.openModal({...info, ...info.extendedProps}, t('events.modal.edit'));
+    };
+
+    const handleChange = async (changeInfo: EventChangeArg) => {
+        const data = changeInfo.event.toJSON();
+        const info = {
+            createdAt: data.extendedProps.createdAt,
+            type: data.extendedProps.type,
+            color: data.backgroundColor,
+            end: data.end,
+            id: data.id,
+            start: data.start,
+            title: data.title
+        };
+        await props.eventService.edit(info as EventInterface);
+        props.eventDispatch({type: 'edit', data: info});
+    };
+
     return (
         <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-            initialView="dayGridMonth"
+            loading={calendarLoaded}
+            headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            locale={(i18n.language === 'es' && esLocale) || undefined}
+            plugins={[dayGridPlugin, listPlugin, interactionPlugin, timeGridPlugin]}
+            initialView="timeGridWeek"
             editable={true}
             selectable={true}
-            select={handleEventClick}
-            // eventClick={handleEventClick}
-            initialEvents={props.displayEvents}
-            events={props.displayEvents}
+            select={handleSelect}
+            eventClick={handleClick}
+            events={props.displayEvents.map((ev) => {
+                console.log();
+                return {
+                    backgroundColor: ev.color,
+                    borderColor: ev.color,
+                    ...ev
+                };
+            })}
             height="100%"
+            ref={calendarRef}
             // eventAdd={handleEventClick}
-            // eventChange={handleEventClick}
+            eventChange={handleChange}
             // eventRemove={handleEventClick}
+            // ref={calendarRef}
         />
     );
 };
 
 const EventList = (props: {
-    openModal: Function;
+    calendarApi: any;
     displayEvents: EventInterface[];
-    setDisplayEvents: Function;
+    eventDispatch: Function;
+    eventService: EventService;
+    openModal: Function;
 }): React.ReactElement => {
-    const {t} = useTranslation();
-    const event = useState({} as EventInterface);
+    const {t, i18n} = useTranslation();
+    const [event, setEvent] = useState({
+        start: now.toISOString(),
+        end: new Date(now.getTime() + 30 * 60 * 1000).toISOString()
+    } as EventInterface);
+    // console.log(props.calendarApi);
+
+    const goToDate = (e: EventInterface) => {
+        // console.log(e);
+        // console.log(props.calendarApi);
+        props.calendarApi.changeView('timeGridDay');
+        props.calendarApi.gotoDate(e.start);
+    };
 
     return (
         <>
-            <Button w="100%" colorScheme="teal" onClick={() => props.openModal(event)}>
-                {t('notifications.add')}
+            <Button
+                w="100%"
+                colorScheme="teal"
+                onClick={() => props.openModal(event, t('events.modal.add'))}
+            >
+                {t('events.modal.add')}
             </Button>
             <Box pt="6">
                 <Text fontSize="22" textAlign="center">
-                    {t('filters.filter')}
+                    {t('lateral.list')}
                 </Text>
-                <VStack
-                    spacing="2"
-                    divider={<StackDivider borderColor="gray.200" />}
-                    maxH="50vh"
-                    overflowY="scroll"
-                >
-                    {props.displayEvents.map((event: EventInterface) => (
-                        <Box key={event.id} align="left" spacing="1" w="100%">
-                            <HStack>
-                                {event.backgroundColor && (
-                                    <Circle bg={event.backgroundColor} w="5" h="5" />
-                                )}
-                                <Text> Title: {event.title} </Text>
-                            </HStack>
+                <Box maxH="50vh" overflowY="scroll">
+                    {props.displayEvents
+                        .sort((a, b) => {
+                            return new Date(a.start).getTime() - new Date(b.start).getTime();
+                        })
+                        .map((e: EventInterface) => (
+                            <Accordion key={e.id} w="100%" allowToggle allowMultiple>
+                                <AccordionItem>
+                                    <AccordionButton _expanded={{bg: 'gray.100'}} px="2">
+                                        <Tooltip
+                                            placement="right"
+                                            bg="gray.600"
+                                            hasArrow
+                                            label={t(`events.type.${e.type}`) + ' - ' + e.title}
+                                        >
+                                            <HStack spacing="2" flex="1" textAlign="left">
+                                                <Circle
+                                                    bg={e.color}
+                                                    w="4"
+                                                    h="4"
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        goToDate(e);
+                                                    }}
+                                                />
+                                                <Text
+                                                    isTruncated
+                                                    maxWidth={{base: '100%', md: 'calc(100vw / 6)'}}
+                                                >
+                                                    {e.title}
+                                                </Text>
+                                            </HStack>
+                                        </Tooltip>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel px="1">
+                                        <VStack>
+                                            <VStack align="left" spacing="1px">
+                                                <Text>{e.title}</Text>
+                                                <Box py="1">
+                                                    <Divider />
+                                                </Box>
+                                                {e.description && (
+                                                    <>
+                                                        <Text noOfLines={3}>{e.description}</Text>
+                                                        <Box py="1">
+                                                            <Divider />
+                                                        </Box>
+                                                    </>
+                                                )}
 
-                            {event.start && <Text mt="0">Date: {event.start}</Text>}
-                            {/* <Box my="2" h="2px" borderBottomWidth='1px' borderColor='gray.200'></Box> */}
-                        </Box>
-                    ))}
-                </VStack>
+                                                <Text fontSize="sm" my="10">
+                                                    {t('events.startDate') + ':'}
+                                                    {Intl.DateTimeFormat(i18n.language, {
+                                                        dateStyle: 'medium',
+                                                        timeStyle: 'short'
+                                                    }).format(new Date(e.start))}
+                                                </Text>
+                                                <Text fontSize="sm">
+                                                    {t('events.endDate') + ':'}
+                                                    {Intl.DateTimeFormat(i18n.language, {
+                                                        dateStyle: 'medium',
+                                                        timeStyle: 'short'
+                                                    }).format(new Date(e.start))}
+                                                </Text>
+                                            </VStack>
+
+                                            <HStack width="100%">
+                                                <Button
+                                                    size="xs"
+                                                    w="50%"
+                                                    colorScheme="blue"
+                                                    aria-label="Open event"
+                                                    variant="outline"
+                                                    onClick={() => goToDate(e)}
+                                                    rightIcon={<SearchIcon w="3" h="3" />}
+                                                >
+                                                    {t('form.open')}
+                                                </Button>
+                                                <Button
+                                                    size="xs"
+                                                    w="50%"
+                                                    colorScheme="blue"
+                                                    aria-label="Edit event"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        props.openModal(e, t('events.modal.edit'))
+                                                    }
+                                                    rightIcon={<EditIcon w="3" h="3" />}
+                                                >
+                                                    {t('form.edit')}
+                                                </Button>
+                                            </HStack>
+                                        </VStack>
+                                        {/* <Box my="2" h="2px" borderBottomWidth='1px' borderColor='gray.200'></Box> */}
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
+                        ))}
+                </Box>
+                <Center>
+                    <Text fontSize="sm">
+                        <Icon as={ChevronDownIcon} mr="2" />
+                        {t('table.scroll')}
+                        <Icon as={ChevronUpIcon} mr="2" />
+                    </Text>
+                </Center>
             </Box>
         </>
     );
 };
 
 const HandleEventsModal = (props: {
+    selectedEvent: EventInterface;
+    eventDispatch: Function;
+    eventService: EventService;
     isOpen: boolean;
-    eventData: EventInterface;
-    calendarEvent: DateSelectArg;
     closeModal: Function;
 }): React.ReactElement => {
-    const {t} = useTranslation();
-    const [event, setEvent] = useState({} as EventInterface);
-    const [isSaving, setSaving] = useState(false);
-    const [isSavingAndClosing, setSavingAndClosing] = useState(false);
+    const {t, i18n} = useTranslation();
+    const eventTypes = props.eventService.getEventTypes();
+    const [event, setEvent] = useState(props.selectedEvent as EventInterface);
+    const [errors, setErrors] = useState({
+        title: false,
+        type: false,
+        start: false,
+        end: false
+    });
 
-    const save = async () => {
-        setSaving(true);
-        console.log({...event, start: props.calendarEvent.startStr, allDay: true});
-        await eventService.edit({
-            ...event,
-            start: props.calendarEvent.startStr || todayStr,
-            allDay: true
-        });
-        setSaving(false);
-    };
-
-    const saveAndClose = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setSavingAndClosing(true);
-        console.log({
-            ...event,
-            start: props.calendarEvent.startStr || todayStr,
-            allDay: true
-        });
-        await eventService.edit({...event, start: props.calendarEvent.startStr, allDay: true});
-        setSavingAndClosing(true);
-        props.closeModal();
-    };
-
-    return (
-        <Modal isOpen={props.isOpen} onClose={() => props.closeModal()}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Modal Title</ModalHeader>
-                <ModalCloseButton />
-                <form onSubmit={saveAndClose} noValidate>
-                    <ModalBody>
-                        {/* <Text>Owner name: {props.notificationData.owner.name}</Text>
-                        <Text>Owner email: {props.notificationData.owner.email}</Text> */}
-                        <FormControl isRequired mt="2">
-                            <FormLabel htmlFor="notificationMsg" type="text">
-                                {t('form.email')}
-                            </FormLabel>
-                            <Textarea
-                                id="notificationMsg"
-                                placeholder={t('form.email')}
-                                value={event.title}
-                                onChange={(e) => setEvent({...event, title: e.target.value.trim()})}
-                            ></Textarea>
-                            <FormErrorMessage>{t('error.required')}</FormErrorMessage>
-                        </FormControl>
-                        <EventsSelector event={event} setEvent={setEvent} />
-                    </ModalBody>
-
-                    <ModalFooter my="6">
-                        <Button
-                            id="saveandclose"
-                            size="sm"
-                            type="submit"
-                            colorScheme="teal"
-                            mr="2"
-                            isLoading={isSavingAndClosing}
-                            rightIcon={<ArrowForwardIcon w={5} h={5} />}
-                        >
-                            {t('form.saveandclose')}
-                        </Button>
-                        <Button
-                            id="save"
-                            size="sm"
-                            type="button"
-                            colorScheme="teal"
-                            mr="2"
-                            isLoading={isSaving}
-                            onClick={save}
-                            rightIcon={<ArrowForwardIcon w={5} h={5} />}
-                        >
-                            {t('form.save')}
-                        </Button>
-                        <Button
-                            colorScheme="red"
-                            size="sm"
-                            rightIcon={<CloseIcon w={3} h={3} />}
-                            onClick={() => props.closeModal()}
-                        >
-                            {t('form.close')}
-                        </Button>
-                    </ModalFooter>
-                </form>
-            </ModalContent>
-        </Modal>
-    );
-};
-
-const EventsSelector = (props: {event: EventInterface; setEvent: Function}): React.ReactElement => {
-    const {t} = useTranslation();
-    const options = [
-        {
-            id: 0,
-            name: 'Junta',
-            backgroundColor: 'blue'
-        },
-        {
-            id: 1,
-            name: 'Cumpleaños',
-            backgroundColor: 'red'
-        },
-        {
-            id: 2,
-            name: 'Mantenimiento',
-            backgroundColor: 'green'
-        },
-        {
-            id: 3,
-            name: 'Otros',
-            backgroundColor: 'yellow'
+    const validate = (): boolean => {
+        const isValid = event.title && event.type && event.start && event.end;
+        if (!isValid) {
+            setErrors({
+                title: !event.title,
+                type: !event.type,
+                start: !event.start,
+                end: !event.end
+            });
         }
-    ];
-    const [value, setValue] = useState(options[1]);
-
-    const onChange = (e: string) => {
-        console.log('onChange: ', e);
-        props.setEvent({
-            ...props.event,
-            type: e,
-            backgroundColor: (options.find((i) => i.name === e) || options[0]).backgroundColor
-        });
+        console.log(isValid, !!isValid, errors);
+        return !!isValid;
     };
 
+    const footerRef = useRef<any>(null);
+    const triggerRef = (e: React.FormEvent<HTMLFormElement>) => {
+        if (footerRef.current) {
+            footerRef.current?.triggerSubmit(e);
+        }
+    };
+
+    useEffect(() => {
+        const start = new Date(event.start);
+        if (event.end && new Date(event.end) < start) {
+            setEvent({
+                ...event,
+                end: new Date(start.getTime() + 30 * 60 * 1000).toISOString()
+            });
+        }
+    }, [event.start, event.end]);
+
     return (
-        <RadioGroup onChange={onChange} defaultValue={value.name}>
-            <Stack direction="row">
-                {options.map((option) => (
-                    <Radio key={option.name} value={option.name}>
-                        {t(option.name)}
-                    </Radio>
-                ))}
-            </Stack>
-        </RadioGroup>
+        <form onSubmit={triggerRef} noValidate>
+            <ModalBody>
+                {/* <Text>Owner name: {props.notificationData.owner.name}</Text>
+                        <Text>Owner email: {props.notificationData.owner.email}</Text> */}
+                <FormControl isRequired mt="2" isInvalid={errors.title}>
+                    <FormLabel htmlFor="title" type="text">
+                        {t('form.title') + ': '}
+                    </FormLabel>
+                    <Input
+                        id="title"
+                        placeholder={t('form.title')}
+                        defaultValue={event.title}
+                        onChange={(e) => setEvent({...event, title: e.target.value})}
+                        onFocus={() => setErrors({...errors, title: false})}
+                    ></Input>
+                    <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl mt="2">
+                    <FormLabel htmlFor="description" type="text">
+                        {t('form.description') + ': '}
+                    </FormLabel>
+                    <Textarea
+                        id="description"
+                        placeholder={t('form.description')}
+                        defaultValue={event.description}
+                        onChange={(e) => setEvent({...event, description: e.target.value})}
+                    ></Textarea>
+                </FormControl>
+
+                <FormControl isRequired mt="4" isInvalid={errors.start}>
+                    <Stack spacing={2} direction="row">
+                        <FormLabel htmlFor="title" type="text" w="200px">
+                            {t('events.startDate') + ': '}
+                        </FormLabel>
+                        <DatePicker
+                            locale={i18n.language}
+                            customInput={<Input />}
+                            selected={event.start ? new Date(event.start) : now}
+                            onChange={(date) =>
+                                setEvent({...event, start: (date || new Date()).toISOString()})
+                            }
+                            todayButton={t('form.today', 'today')}
+                            showTimeSelect
+                            dateFormat="Pp"
+                            minDate={now}
+                            maxDate={nextYear}
+                        />
+                    </Stack>
+                    <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl isRequired mt="2" isInvalid={errors.end}>
+                    <Stack spacing={2} direction="row">
+                        <FormLabel htmlFor="title" type="text" w="200px">
+                            {t('events.endDate') + ': '}
+                        </FormLabel>
+                        <DatePicker
+                            locale={i18n.language}
+                            customInput={<Input />}
+                            selected={event.end ? new Date(event.end) : now}
+                            onChange={(date) =>
+                                setEvent({...event, end: (date || new Date()).toISOString() || ''})
+                            }
+                            todayButton={t('form.today', 'today')}
+                            showTimeSelect
+                            dateFormat="Pp"
+                            minTime={new Date(event.start)}
+                            maxTime={new Date(nextYear.setHours(0, 0, 0, 0))}
+                            minDate={new Date(event.start)}
+                            maxDate={nextYear}
+                        />
+                    </Stack>
+                    <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl isRequired mt="2" isInvalid={errors.type}>
+                    <FormLabel>{t('events.modal.chooseType')}</FormLabel>
+                    <RadioGroup
+                        onChange={(e) => {
+                            setErrors({...errors, type: false});
+                            setEvent({
+                                ...event,
+                                type: e,
+                                color: props.eventService.getTagColor(e)
+                            });
+                        }}
+                        defaultValue={event.type || 'meetings'}
+                    >
+                        <Stack direction="column">
+                            {Object.keys(eventTypes).map((ekey) => (
+                                <Radio key={eventTypes[ekey].id} value={eventTypes[ekey].id}>
+                                    {t(`events.type.${eventTypes[ekey].id}`)}
+                                </Radio>
+                            ))}
+                        </Stack>
+                    </RadioGroup>
+                    <FormErrorMessage>{t('error.required')}</FormErrorMessage>
+                </FormControl>
+            </ModalBody>
+
+            <ModalSaleFooter
+                item={event}
+                service={props.eventService}
+                onSubmit={footerRef}
+                isValid={validate}
+                closeModal={props.closeModal}
+            />
+        </form>
     );
 };
 

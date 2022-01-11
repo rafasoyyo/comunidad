@@ -2,9 +2,11 @@ const Components = {
     header: {
         profile: 'Profile'
     },
-    filter: {
+    lateral: {
         filter: 'Filter',
-        typetofilter: 'Type of filter'
+        typetofilter: 'Type of filter',
+        sort: 'Sort',
+        list: 'List'
     },
     sorts: {
         sort: 'Sort',
@@ -23,7 +25,7 @@ const Components = {
         drag_drop: 'Drag and drop some files here, or click to select files'
     },
     table: {
-        scroll: 'Scroll to see other rows'
+        scroll: 'Scroll to see more'
     }
 };
 

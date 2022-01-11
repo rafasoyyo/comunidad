@@ -58,7 +58,20 @@ const Pages = {
         name: 'Lands'
     },
     events: {
-        name: 'Events'
+        name: 'Events',
+        startDate: 'Start date',
+        endDate: 'End date',
+        modal: {
+            add: 'Add event',
+            edit: 'Edit event',
+            chooseType: 'What kind of event is it?'
+        },
+        type: {
+            meetings: 'meetings',
+            birthday: 'birthday',
+            maintenance: 'maintenance',
+            more: 'Others'
+        }
     },
     receipts: {
         name: 'Receipts'

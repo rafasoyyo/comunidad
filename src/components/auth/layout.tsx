@@ -39,7 +39,11 @@ export default function Layout(props: {
                 </GridItem>
             </Grid>
             {props.modalProps && (
-                <Modal isOpen={props.modalProps.isOpen} onClose={props.modalProps.onClose}>
+                <Modal
+                    size="xl"
+                    isOpen={props.modalProps.isOpen}
+                    onClose={props.modalProps.onClose}
+                >
                     <ModalOverlay />
                     <ModalContent>
                         <ModalHeader>{props.modalProps.title}</ModalHeader>

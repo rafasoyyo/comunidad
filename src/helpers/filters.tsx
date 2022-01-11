@@ -5,7 +5,7 @@ export interface FilterInterface {
 
 const Filters = {
     filterByString: (item: Record<string, any>, key: string) => {
-        return Object.values(item.data).some((v) => new RegExp(key, 'i').test(String(v)));
+        return Object.values(item).some((v) => new RegExp(key, 'i').test(String(v)));
     }
 };
 
