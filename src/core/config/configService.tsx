@@ -1,8 +1,8 @@
-import {database} from '../../firebaseSetup';
-import {ref, get, child, DataSnapshot} from 'firebase/database';
+import {remoteConfig} from '../../firebaseSetup';
 import * as bs from 'react-icons/bs';
 
 import {ConfigInterface, ModuleInterface} from '../interfaces';
+import {getValue, fetchAndActivate} from 'firebase/remote-config';
 
 const modules: ModuleInterface[] = [
     {
@@ -57,7 +57,7 @@ export default class ConfigService {
      */
     getBackgroundImage = (serverConfig: ConfigInterface): string => {
         const configBg = serverConfig.app?.loginBackgrounds
-            ? serverConfig.app.loginBackgrounds.split(',')
+            ? serverConfig.app.loginBackgrounds
             : ['/login_default.jpg'];
         const index = Math.floor(Math.random() * configBg.length);
         return configBg[index];
@@ -75,27 +75,22 @@ export default class ConfigService {
                 }
             } as ConfigInterface;
 
-            get(child(ref(database), `config`))
-                .then((snapshot: DataSnapshot) => {
-                    if (snapshot.exists()) {
-                        const serverConfig = snapshot.val();
-                        const modulesId =
-                            serverConfig.app?.modulesId?.split(',') || modules.map((m) => m.id);
-                        config = {
-                            modules: modules.filter((m) => modulesId.includes(m.id)),
-                            community: {...serverConfig.community},
-                            app: {
-                                loginBackground: this.getBackgroundImage(serverConfig),
-                                ...serverConfig.app
-                            }
-                        };
-                        resolve(config as ConfigInterface);
-                    } else {
-                        reject(config);
-                    }
+            fetchAndActivate(remoteConfig)
+                .then((c) => {
+                    const serverConfig = JSON.parse(getValue(remoteConfig, 'config').asString());
+                    const modulesId = serverConfig.app?.modulesId || modules.map((m) => m.id);
+                    config = {
+                        ...serverConfig,
+                        modules: modules.filter((m) => modulesId.includes(m.id)),
+                        app: {
+                            loginBackground: this.getBackgroundImage(serverConfig),
+                            ...serverConfig.app
+                        }
+                    };
+                    resolve(config as ConfigInterface);
                 })
-                .catch(() => {
-                    // console.log({ config });
+                .catch((e) => {
+                    console.error('Error loading config: ', e);
                     reject(config);
                 });
         });
