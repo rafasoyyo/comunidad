@@ -49,9 +49,9 @@ export default class DocumentService {
                 id: 'contract',
                 color: 'purple.300'
             },
-            notDefined: {
-                id: 'notDefined',
-                color: ''
+            other: {
+                id: 'other',
+                color: 'pink.300'
             }
         };
     };

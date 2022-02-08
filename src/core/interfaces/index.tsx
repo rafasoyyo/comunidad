@@ -1,5 +1,5 @@
 import AbstractInterface from '../abstract/abstractInterface';
-import AddressInterface from './addressInterface';
+import AddressInterface from '../address/addressInterface';
 import ConfigInterface, {ModuleInterface} from '../config/configInterface';
 import DocumentInterface from '../document/documentInterface';
 import ErrorInterface from './errorInterface';

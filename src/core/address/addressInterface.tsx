@@ -1,4 +1,7 @@
-export default interface AddressInterface {
+import {AbstractInterface} from '../interfaces';
+
+export default interface AddressInterface extends AbstractInterface {
+    alias: string;
     street: string;
     number: string;
     city: string;

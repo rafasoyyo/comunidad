@@ -41,11 +41,11 @@ import {
 } from '@chakra-ui/react';
 import {ChevronDownIcon, ChevronUpIcon, EditIcon, SearchIcon} from '@chakra-ui/icons';
 
-import {Layout, ModalSaleFooter} from '../../components/';
+import {Layout, ModalSaveFooter} from '../../components/';
 import {EventService} from '../../core/services';
 import {UserContext} from '../../core/contexts';
 import {EventInterface} from '../../core/interfaces';
-import Reducer from '../../core/reducers';
+import {crudReducer} from '../../core/reducers';
 
 registerLocale('es', es);
 
@@ -53,12 +53,12 @@ const now = new Date();
 const nextYear = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000);
 const halfHour = 30 * 60 * 1000;
 
-function Events(): React.ReactElement {
+export default function Events(): React.ReactElement {
     const [isLoading, setLoading] = useState(false);
     const {isOpen, onOpen, onClose} = useDisclosure();
     const [calendarApi, setCalendarApi] = useState<any>();
     const [modalTitle, setModalTitle] = useState('');
-    const [displayEvents, documentsDispatch] = useReducer(Reducer, []);
+    const [displayEvents, documentsDispatch] = useReducer(crudReducer, []);
     const [selectedEvent, setSelectedEvent] = useState({} as EventInterface);
 
     const userContext = useContext(UserContext);
@@ -483,8 +483,6 @@ const HandleEventsModal = (props: {
                             todayButton={t('form.today', 'today')}
                             showTimeSelect
                             dateFormat="Pp"
-                            minTime={new Date(new Date(event.start).getTime() + halfHour)}
-                            maxTime={new Date(nextYear.setHours(23, 59, 59, 0))}
                             minDate={new Date(event.start)}
                             maxDate={nextYear}
                         />
@@ -517,7 +515,7 @@ const HandleEventsModal = (props: {
                 </FormControl>
             </ModalBody>
 
-            <ModalSaleFooter
+            <ModalSaveFooter
                 item={event}
                 service={props.eventService}
                 dispatch={props.eventDispatch}
@@ -528,5 +526,3 @@ const HandleEventsModal = (props: {
         </form>
     );
 };
-
-export default Events;

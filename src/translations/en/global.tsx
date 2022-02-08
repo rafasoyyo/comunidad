@@ -1,4 +1,5 @@
 const Global = {
+    alias: 'Alias',
     welcome: 'Welcome to the community',
     loading: 'Loading data...',
     download: 'Download',

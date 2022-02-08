@@ -1,4 +1,16 @@
 const Components = {
+    address: {
+        address: 'Dirección',
+        street: 'Calle',
+        number: 'Número',
+        city: 'Ciudad',
+        state: 'Provincia',
+        zip: 'Código postal',
+        country: 'País',
+        tower: 'Torre',
+        add: 'Añadir dirección',
+        edit: 'Editar dirección'
+    },
     header: {
         profile: 'Perfil'
     },

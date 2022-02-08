@@ -7,7 +7,7 @@ import {ArrowForwardIcon, CloseIcon, DeleteIcon} from '@chakra-ui/icons';
 import {AbstractInterface} from '../../core/interfaces';
 import {AbstractService} from '../../core/services';
 
-const ModalSaleFooter = <I extends AbstractInterface>(props: {
+const ModalSaveFooter = <I extends AbstractInterface>(props: {
     item: I;
     service: AbstractService<I>;
     onSubmit: Ref<unknown> | undefined;
@@ -105,4 +105,4 @@ const ModalSaleFooter = <I extends AbstractInterface>(props: {
     );
 };
 
-export default ModalSaleFooter;
+export default ModalSaveFooter;

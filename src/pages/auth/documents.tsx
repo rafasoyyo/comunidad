@@ -40,7 +40,7 @@ import {
 import {DocumentService} from '../../core/services';
 import {UserContext} from '../../core/contexts';
 import {Layout, UploadZone} from '../../components';
-import Reducer from '../../core/reducers';
+import {crudReducer} from '../../core/reducers';
 import {Sorters, Filters, FilterInterface} from '../../helpers';
 
 export default function Documents(props: {}): React.ReactElement {
@@ -48,7 +48,7 @@ export default function Documents(props: {}): React.ReactElement {
     const [isLoading, setLoading] = useState(true);
     const [modalTitle, setModalTitle] = useState('');
     const {isOpen, onOpen, onClose} = useDisclosure();
-    const [displayDocuments, documentsDispatch] = useReducer(Reducer, []);
+    const [displayDocuments, documentsDispatch] = useReducer(crudReducer, []);
     const [selectedDocument, setSelectedDocument] = useState({} as StorageReference);
     const [documentsFilter, setDocumentsFilter] = useState({
         type: '',
@@ -198,7 +198,7 @@ const DocumentPageComponent = (props: {
                     {props.displayDocuments.length > 0 &&
                         props.displayDocuments
                             .filter((i) => {
-                                const docKey = i.metadata.customMetadata?.type || 'notDefined';
+                                const docKey = i.metadata?.customMetadata?.type || 'notDefined';
                                 return props.documentsFilter.type
                                     ? (Filters as Record<string, any>)[props.documentsFilter.type](
                                           {
@@ -403,7 +403,7 @@ const HandleDocumentModal = (props: {
         }
         const filesRef = await (uploads as UploadResult[]).map((d: any) => d.ref);
         const filesInfo = await props.documentService.getFilesInfo(filesRef);
-        await props.documentsDispatch({type: 'add', data: filesInfo});
+        props.documentsDispatch({type: 'add', data: filesInfo});
         setUploading(false);
         props.closeModal();
     };

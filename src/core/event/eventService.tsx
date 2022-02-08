@@ -4,7 +4,7 @@ import {EventInterface, UserInterface} from '../interfaces';
 export const identifier = 'events';
 
 export default class EventService extends AbstractService<EventInterface> {
-    constructor(currentUser?: UserInterface) {
+    constructor(currentUser: UserInterface) {
         super(identifier, currentUser);
     }
 

@@ -3,11 +3,11 @@ import {collection, getDoc, getDocs, doc, setDoc, deleteDoc, Timestamp} from 'fi
 import {AbstractInterface, ErrorInterface, UserInterface} from '../interfaces';
 
 export default class AbstractService<S extends AbstractInterface> {
-    private collectionId: string;
+    collectionId: string;
 
-    private currentUser?: UserInterface;
+    currentUser?: UserInterface;
 
-    constructor(collectionId: string, currentUser?: UserInterface) {
+    constructor(collectionId: string, currentUser: UserInterface) {
         this.collectionId = collectionId;
         this.currentUser = currentUser;
     }

@@ -18,7 +18,8 @@ const Forms = {
         singOut: 'Cerrar sesión',
         submit: 'Enviar',
         surname: 'Apellidos',
-        title: 'Título'
+        title: 'Título',
+        today: 'Hoy'
     },
     error: {
         auth_wrong_password: 'Usuario o contraseña incorrectos',

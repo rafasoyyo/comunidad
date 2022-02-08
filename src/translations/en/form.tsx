@@ -18,7 +18,8 @@ const Forms = {
         singOut: 'Sing Out',
         submit: 'Submit',
         surname: 'Surname',
-        title: 'Title'
+        title: 'Title',
+        today: 'Today'
     },
     error: {
         auth_wrong_password: 'Invalid user or password',

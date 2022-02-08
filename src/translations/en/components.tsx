@@ -1,4 +1,16 @@
 const Components = {
+    address: {
+        address: 'Address',
+        street: 'Street',
+        number: 'Number',
+        city: 'City',
+        state: 'State',
+        zip: 'Zip',
+        country: 'Country',
+        tower: 'Tower',
+        add: 'Add address',
+        edit: 'Edit address'
+    },
     header: {
         profile: 'Profile'
     },

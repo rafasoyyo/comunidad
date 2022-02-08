@@ -1,3 +1,5 @@
+import {others} from '@chakra-ui/react';
+
 const Pages = {
     login: {
         title: 'Accede a tu cuenta',
@@ -48,7 +50,8 @@ const Pages = {
             notification: 'Notificación',
             minutes: 'Acta',
             invoice: 'Factura',
-            contract: 'Contrato'
+            contract: 'Contrato',
+            other: 'Otro'
         }
     },
     notifications: {
