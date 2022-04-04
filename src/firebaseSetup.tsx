@@ -31,6 +31,6 @@ const store = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 const remoteConfig = getRemoteConfig(app);
-// remoteConfig.settings.minimumFetchIntervalMillis = 3600000;
+remoteConfig.settings.minimumFetchIntervalMillis = 3600000;
 
 export {app, auth, store, storage, remoteConfig};

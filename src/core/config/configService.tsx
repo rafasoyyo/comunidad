@@ -77,7 +77,9 @@ export default class ConfigService {
 
             fetchAndActivate(remoteConfig)
                 .then((c) => {
-                    const serverConfig = JSON.parse(getValue(remoteConfig, 'config').asString());
+                    const serverConfig = JSON.parse(
+                        getValue(remoteConfig, 'config').asString() || '{}'
+                    );
                     const modulesId = serverConfig.app?.modulesId || modules.map((m) => m.id);
                     config = {
                         ...serverConfig,

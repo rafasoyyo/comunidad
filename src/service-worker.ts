@@ -15,7 +15,7 @@ import {precacheAndRoute, createHandlerBoundToURL} from 'workbox-precaching';
 import {registerRoute} from 'workbox-routing';
 import {StaleWhileRevalidate} from 'workbox-strategies';
 
-const version = '07.01.22';
+const version = '03.04.22';
 
 declare const self: ServiceWorkerGlobalScope;
 
